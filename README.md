@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 共通テスト地理問題データベース
 
-## Getting Started
+Next.js + Vercelで構築した地理問題データベースWebアプリケーション
 
-First, run the development server:
+## セットアップ
+
+### 1. 依存関係のインストール
+```bash
+npm install
+```
+
+### 2. 環境変数の設定
+
+`.env.local`ファイルに以下を設定：
+
+```
+GOOGLE_SPREADSHEET_ID=17cxHniOQP2C7QKCV8nqnn3IKEcd1HwWiDgExGb6FfEE
+GOOGLE_SERVICE_ACCOUNT_EMAIL=your-service-account@project.iam.gserviceaccount.com
+GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
+```
+
+### 3. Google Service Accountの設定（本番環境用）
+
+1. [Google Cloud Console](https://console.cloud.google.com)でプロジェクトを作成
+2. Google Sheets APIを有効化
+3. サービスアカウントを作成し、JSONキーをダウンロード
+4. スプレッドシートにサービスアカウントのメールアドレスを共有（閲覧権限）
+
+### 4. 開発サーバーの起動
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+http://localhost:3000 でアプリケーションが起動します。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Vercelへのデプロイ
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 自動デプロイの設定
 
-## Learn More
+1. GitHubにリポジトリを作成
+2. Vercelでプロジェクトをインポート
+3. 環境変数を設定（GOOGLE_SPREADSHEET_ID, GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY）
+4. デプロイ完了！
 
-To learn more about Next.js, take a look at the following resources:
+以降はGitHubにpushするだけで自動的にデプロイされます。
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 機能
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- 年度別問題検索（2021-2025年）
+- 分野タグでのフィルタリング
+- キーワード検索
+- 問題画像の表示
+- 正答の表示/非表示切り替え
 
-## Deploy on Vercel
+## 技術スタック
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **フレームワーク**: Next.js 14 (App Router)
+- **言語**: TypeScript
+- **スタイリング**: Tailwind CSS
+- **データソース**: Google Sheets API
+- **ホスティング**: Vercel
+- **アイコン**: Lucide React
