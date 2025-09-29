@@ -27,6 +27,9 @@ export default function Home() {
     try {
       const response = await fetch('/api/questions')
       const data = await response.json()
+      console.log('API Response:', data)
+      console.log('Data length:', data.length)
+      console.log('First item:', data[0])
       setQuestions(data)
       
       // カテゴリを抽出
@@ -46,6 +49,8 @@ export default function Home() {
 
   const filterQuestions = useCallback(() => {
     let filtered = questions
+    console.log('Filtering with questions:', questions)
+    console.log('Questions length:', questions.length)
 
     if (selectedYear) {
       filtered = filtered.filter(q => q.year === selectedYear)
@@ -65,6 +70,8 @@ export default function Home() {
       )
     }
 
+    console.log('Filtered questions:', filtered)
+    console.log('Filtered length:', filtered.length)
     setFilteredQuestions(filtered)
   }, [questions, selectedYear, selectedCategories, searchText])
 
