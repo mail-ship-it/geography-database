@@ -23,14 +23,6 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [showAnswers, setShowAnswers] = useState<{ [key: string]: boolean }>({})
 
-  useEffect(() => {
-    fetchQuestions()
-  }, [])
-
-  useEffect(() => {
-    filterQuestions()
-  }, [filterQuestions])
-
   const fetchQuestions = async () => {
     try {
       const response = await fetch('/api/questions')
@@ -75,6 +67,14 @@ export default function Home() {
 
     setFilteredQuestions(filtered)
   }, [questions, selectedYear, selectedCategories, searchText])
+
+  useEffect(() => {
+    fetchQuestions()
+  }, [])
+
+  useEffect(() => {
+    filterQuestions()
+  }, [filterQuestions])
 
   const toggleCategory = (category: string) => {
     setSelectedCategories(prev =>
