@@ -33,12 +33,9 @@ const mockData = [
 
 export async function GET() {
   try {
-    // 開発中は一旦モックデータを返す
-    // TODO: Google Service Account認証を設定後、実際のデータを取得
-    if (!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !process.env.GOOGLE_PRIVATE_KEY) {
-      console.log('Using mock data - Google credentials not configured')
-      return NextResponse.json(mockData)
-    }
+    // 一時的にモックデータを強制表示してテスト
+    console.log('Force returning mock data for testing')
+    return NextResponse.json(mockData)
 
     // Google Sheets APIクライアントの初期化
     const auth = new google.auth.GoogleAuth({
