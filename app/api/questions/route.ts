@@ -32,63 +32,18 @@ const mockData = [
 ]
 
 export async function GET() {
-  try {
-    // 一時的にモックデータを強制表示してテスト
-    console.log('Force returning mock data for testing')
-    return NextResponse.json(mockData)
-
-    // Google Sheets APIクライアントの初期化
-    const auth = new google.auth.GoogleAuth({
-      credentials: {
-        client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-        private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      },
-      scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
-    })
-
-    const sheets = google.sheets({ version: 'v4', auth })
-    
-    // 全年度のデータを取得
-    const years = ['2021', '2022', '2023', '2024', '2025']
-    const allQuestions: Question[] = []
-
-    for (const year of years) {
-      try {
-        const sheetName = `${year}年共通テスト地理B`
-        const response = await sheets.spreadsheets.values.get({
-          spreadsheetId: SPREADSHEET_ID,
-          range: `${sheetName}!A:I`,
-        })
-
-        const rows = response.data.values
-        if (!rows || rows.length === 0) continue
-
-        // ヘッダー行をスキップ
-        for (let i = 1; i < rows.length; i++) {
-          const row = rows[i]
-          if (!row[0] && !row[1]) continue // 空行をスキップ
-
-          allQuestions.push({
-            id: row[0] || '',
-            questionId: row[1] || '',
-            category: row[2] || '',
-            answer: row[3] || '',
-            correctRate: row[4] || '',
-            createdDate: row[5] || '',
-            notes: row[6] || '',
-            imageFile: row[7] || '',
-            imageUrl: row[8] || '',
-            year: year
-          })
-        }
-      } catch (error) {
-        console.error(`Error fetching ${year} data:`, error)
-      }
+  // 強制的にモックデータを返す
+  const mockQuestions = [
+    {
+      id: '1',
+      questionId: '2024_geo_1_1',
+      category: '地形',
+      answer: '3',
+      correctRate: '',
+      imageUrl: 'https://drive.google.com/file/d/sample',
+      year: '2024'
     }
-
-    return NextResponse.json(allQuestions)
-  } catch (error) {
-    console.error('Error fetching questions:', error)
-    return NextResponse.json({ error: 'Failed to fetch questions' }, { status: 500 })
-  }
+  ]
+  
+  return NextResponse.json(mockQuestions)
 }
