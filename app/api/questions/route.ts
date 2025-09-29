@@ -1,6 +1,19 @@
 import { NextResponse } from 'next/server'
 import { google } from 'googleapis'
 
+type Question = {
+  id: string
+  questionId: string
+  category: string
+  answer: string
+  correctRate: string
+  createdDate: string
+  notes: string
+  imageFile: string
+  imageUrl: string
+  year: string
+}
+
 // 環境変数から認証情報を取得
 const SPREADSHEET_ID = process.env.GOOGLE_SPREADSHEET_ID!
 
@@ -40,7 +53,7 @@ export async function GET() {
     
     // 全年度のデータを取得
     const years = ['2021', '2022', '2023', '2024', '2025']
-    const allQuestions: any[] = []
+    const allQuestions: Question[] = []
 
     for (const year of years) {
       try {

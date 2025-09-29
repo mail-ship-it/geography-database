@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Search, Tag, Calendar, Image as ImageIcon } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { Search, Tag, Calendar } from 'lucide-react'
 
 type Question = {
   id: string
@@ -29,7 +29,7 @@ export default function Home() {
 
   useEffect(() => {
     filterQuestions()
-  }, [questions, selectedYear, selectedCategories, searchText])
+  }, [filterQuestions])
 
   const fetchQuestions = async () => {
     try {
@@ -52,7 +52,7 @@ export default function Home() {
     }
   }
 
-  const filterQuestions = () => {
+  const filterQuestions = useCallback(() => {
     let filtered = questions
 
     if (selectedYear) {
@@ -74,7 +74,7 @@ export default function Home() {
     }
 
     setFilteredQuestions(filtered)
-  }
+  }, [questions, selectedYear, selectedCategories, searchText])
 
   const toggleCategory = (category: string) => {
     setSelectedCategories(prev =>
