@@ -41,9 +41,9 @@ export async function GET() {
     const questions: Question[] = rows.slice(1).map((row, index) => ({
       id: (index + 1).toString(),
       questionId: row[0] || '', // A列: 問題ID（2024_geo_1_1など）
-      category: row[1] || '', // B列: カテゴリ（地形,農業など）
-      answer: row[2] || '', // C列: 答え
-      correctRate: row[3] || '', // D列: 正答率
+      category: row[2] || '', // C列: 分野タグ（地形,農業など）
+      answer: row[3] || '', // D列: 正答
+      correctRate: row[4] || '', // E列: 正答率
       imageUrl: convertDriveUrlToDirectLink(row[8] || ''), // I列: Google Drive URL → 直接表示可能URL
       year: '2024', // 固定値
       notes: row[6] || '', // G列: ノート
