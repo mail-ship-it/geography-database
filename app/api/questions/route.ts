@@ -40,15 +40,15 @@ export async function GET() {
     // ヘッダー行をスキップして、データを変換
     const questions: Question[] = rows.slice(1).map((row, index) => ({
       id: (index + 1).toString(),
-      questionId: row[1] || '', // B列: 問題ID（2024_geo_1_1など）
-      category: row[2] || '', // C列: カテゴリ（地形,農業など）
-      answer: row[3] || '', // D列: 答え
-      correctRate: row[4] || '', // E列: 正答率
-      imageUrl: convertDriveUrlToDirectLink(row[9] || ''), // J列: Google Drive URL → 直接表示可能URL
+      questionId: row[0] || '', // A列: 問題ID（2024_geo_1_1など）
+      category: row[1] || '', // B列: カテゴリ（地形,農業など）
+      answer: row[2] || '', // C列: 答え
+      correctRate: row[3] || '', // D列: 正答率
+      imageUrl: convertDriveUrlToDirectLink(row[8] || ''), // I列: Google Drive URL → 直接表示可能URL
       year: '2024', // 固定値
-      notes: row[7] || '', // H列: ノート
-      createdDate: row[8] || '', // I列: 作成日
-      imageFile: row[9] || '' // J列: 元のGoogle Drive URL
+      notes: row[6] || '', // G列: ノート
+      createdDate: row[7] || '', // H列: 作成日
+      imageFile: row[8] || '' // I列: 元のGoogle Drive URL
     }))
 
     return NextResponse.json(questions)
