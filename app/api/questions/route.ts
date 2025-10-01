@@ -32,15 +32,33 @@ const mockData = [
 ]
 
 export async function GET() {
-  // 強制的にモックデータを返す
+  // より多くのモックデータを返す（一時的対応）
   const mockQuestions = [
     {
       id: '1',
       questionId: '2024_geo_1_1',
       category: '地形',
       answer: '3',
-      correctRate: '',
-      imageUrl: 'https://drive.google.com/file/d/sample',
+      correctRate: '75%',
+      imageUrl: 'https://drive.google.com/uc?id=1NxLRq2Ceq2DioGun0IPQXlMTam72-FtL&export=view',
+      year: '2024'
+    },
+    {
+      id: '2', 
+      questionId: '2024_geo_1_2',
+      category: '気候',
+      answer: '1',
+      correctRate: '82%',
+      imageUrl: 'https://drive.google.com/uc?id=1k6wiaRKCNGCWJF7-K3odNkyVKDFn5clK&export=view',
+      year: '2024'
+    },
+    {
+      id: '3',
+      questionId: '2024_geo_1_3', 
+      category: '農業',
+      answer: '4',
+      correctRate: '68%',
+      imageUrl: 'https://drive.google.com/uc?id=199jK5aNx9YCmOpB-OD-V_PeN0EBnUvYQ&export=view',
       year: '2024'
     }
   ]
