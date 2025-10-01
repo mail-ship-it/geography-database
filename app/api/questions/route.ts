@@ -1,37 +1,39 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { getGoogleSheetsClient, SPREADSHEET_ID, SHEET_NAME, Question } from '@/lib/googleSheets'
 
 export async function GET() {
   try {
-    // Supabaseからデータを取得
-    const { data: questions, error } = await supabase
-      .from('questions')
-      .select('*')
-      .order('year', { ascending: false })
-      .order('question_id', { ascending: true })
+    const sheets = getGoogleSheetsClient()
+    
+    // スプレッドシートからデータを取得
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `${SHEET_NAME}!A:K`, // A列からK列まで取得
+    })
 
-    if (error) {
-      console.error('Supabase error:', error)
-      return NextResponse.json({ error: 'Failed to fetch questions' }, { status: 500 })
+    const rows = response.data.values
+    
+    if (!rows || rows.length <= 1) {
+      return NextResponse.json([])
     }
 
-    // フロントエンド用の形式に変換
-    const formattedQuestions = questions.map(q => ({
-      id: q.id.toString(),
-      questionId: q.question_id,
-      category: q.category,
-      answer: q.answer,
-      correctRate: q.correct_rate,
-      imageUrl: q.image_url,
-      year: q.year.toString(),
-      notes: q.notes || '',
-      createdDate: q.created_date || '',
-      imageFile: '' // 互換性のため
+    // ヘッダー行をスキップして、データを変換
+    const questions: Question[] = rows.slice(1).map((row, index) => ({
+      id: (index + 1).toString(),
+      questionId: row[0] || '',
+      category: row[1] || '',
+      answer: row[2] || '',
+      correctRate: row[3] || '',
+      imageUrl: row[4] || '',
+      year: row[5] || '',
+      notes: row[6] || '',
+      createdDate: row[7] || '',
+      imageFile: row[8] || ''
     }))
 
-    return NextResponse.json(formattedQuestions)
+    return NextResponse.json(questions)
   } catch (error) {
-    console.error('API error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('Google Sheets API error:', error)
+    return NextResponse.json({ error: 'Failed to fetch questions from Google Sheets' }, { status: 500 })
   }
 }
