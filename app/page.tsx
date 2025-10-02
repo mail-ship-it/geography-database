@@ -1,279 +1,119 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { Search, Tag, Calendar } from 'lucide-react'
-
-type Question = {
-  id: string
-  questionId: string
-  category: string
-  answer: string
-  correctRate: string
-  imageUrl: string
-  year: string
-  questionText?: string
-  fullQuestionText?: string
-}
+import Link from 'next/link'
+import { Calendar, Search, FileText, BarChart3 } from 'lucide-react'
 
 export default function Home() {
-  const [questions, setQuestions] = useState<Question[]>([])
-  const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([])
-  const [categories, setCategories] = useState<string[]>([])
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [selectedYear, setSelectedYear] = useState<string>('')
-  const [searchText, setSearchText] = useState<string>('')
-  const [loading, setLoading] = useState(true)
-  const [showAnswers, setShowAnswers] = useState<{ [key: string]: boolean }>({})
-
-  const fetchQuestions = async () => {
-    try {
-      const response = await fetch('/api/questions')
-      const data = await response.json()
-      console.log('API Response:', data)
-      console.log('Data length:', data.length)
-      console.log('First item:', data[0])
-      setQuestions(data)
-      
-      // カテゴリを抽出
-      const allCategories = new Set<string>()
-      data.forEach((q: Question) => {
-        if (q.category) {
-          q.category.split(',').forEach(cat => allCategories.add(cat.trim()))
-        }
-      })
-      setCategories(Array.from(allCategories).sort())
-      setLoading(false)
-    } catch (error) {
-      console.error('Error fetching questions:', error)
-      setLoading(false)
-    }
-  }
-
-  const filterQuestions = useCallback(() => {
-    let filtered = questions
-    console.log('Filtering with questions:', questions)
-    console.log('Questions length:', questions.length)
-
-    if (selectedYear) {
-      filtered = filtered.filter(q => q.year === selectedYear)
-    }
-
-    if (selectedCategories.length > 0) {
-      filtered = filtered.filter(q => 
-        selectedCategories.every(cat => q.category?.includes(cat))
-      )
-    }
-
-    if (searchText) {
-      const lower = searchText.toLowerCase()
-      filtered = filtered.filter(q => 
-        q.questionId?.toLowerCase().includes(lower) ||
-        q.category?.toLowerCase().includes(lower) ||
-        q.questionText?.toLowerCase().includes(lower) ||
-        q.fullQuestionText?.toLowerCase().includes(lower)
-      )
-    }
-
-    console.log('Filtered questions:', filtered)
-    console.log('Filtered length:', filtered.length)
-    setFilteredQuestions(filtered)
-  }, [questions, selectedYear, selectedCategories, searchText])
-
-  useEffect(() => {
-    fetchQuestions()
-  }, [])
-
-  useEffect(() => {
-    filterQuestions()
-  }, [filterQuestions])
-
-  const toggleCategory = (category: string) => {
-    setSelectedCategories(prev =>
-      prev.includes(category)
-        ? prev.filter(c => c !== category)
-        : [...prev, category]
-    )
-  }
-
-  const toggleAnswer = (questionId: string) => {
-    setShowAnswers(prev => ({
-      ...prev,
-      [questionId]: !prev[questionId]
-    }))
-  }
-
-  const convertImageUrl = (url: string) => {
-    if (!url) return ''
-    const match = url.match(/\/file\/d\/([a-zA-Z0-9-_]+)/)
-    if (match) {
-      return `https://drive.google.com/uc?id=${match[1]}`
-    }
-    return url
-  }
-
   return (
     <main className="min-h-screen bg-gray-50">
       {/* ヘッダー */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-8">
-        <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold text-center mb-2">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
             🌏 共通テスト地理問題データベース
           </h1>
-          <p className="text-center opacity-90">
-            過去5年分の問題を分野別に検索・閲覧できます
+          <p className="text-xl opacity-90 mb-8">
+            過去5年分の問題を効率的に学習できます
           </p>
+          <div className="text-lg opacity-80">
+            2021年〜2025年 | 本試験・追試験対応
+          </div>
         </div>
       </div>
 
-      {/* 検索パネル */}
-      <div className="container mx-auto px-4 py-6">
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            {/* 年度選択 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Calendar className="inline w-4 h-4 mr-1" />
-                年度
-              </label>
-              <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">全年度</option>
-                {[2025, 2024, 2023, 2022, 2021].map(year => (
-                  <option key={year} value={year.toString()}>{year}年</option>
-                ))}
-              </select>
-            </div>
+      {/* メイン選択画面 */}
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">
+            表示方式を選択してください
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* 年度ごとに表示 */}
+            <Link href="/year">
+              <div className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer group">
+                <div className="p-8 text-center">
+                  <div className="bg-blue-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-200 transition-colors">
+                    <Calendar className="w-10 h-10 text-blue-600" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                    年度ごとに表示
+                  </h3>
+                  <p className="text-gray-600 mb-6 leading-relaxed">
+                    各年度の本試験・追試験の問題PDF、解答PDF、平均点を一覧で確認できます
+                  </p>
+                  <div className="space-y-2 text-sm text-gray-500">
+                    <div className="flex items-center justify-center">
+                      <FileText className="w-4 h-4 mr-2" />
+                      問題・解答PDF
+                    </div>
+                    <div className="flex items-center justify-center">
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      平均点データ
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-blue-600 text-white py-4 rounded-b-lg text-center font-medium group-hover:bg-blue-700 transition-colors">
+                  年度別表示を開く →
+                </div>
+              </div>
+            </Link>
 
-            {/* キーワード検索 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Search className="inline w-4 h-4 mr-1" />
-                キーワード検索
-              </label>
-              <input
-                type="text"
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                placeholder="問題IDや分野名で検索"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+            {/* 分野ごとに表示 */}
+            <Link href="/category">
+              <div className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer group">
+                <div className="p-8 text-center">
+                  <div className="bg-green-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:bg-green-200 transition-colors">
+                    <Search className="w-10 h-10 text-green-600" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                    分野ごとに表示
+                  </h3>
+                  <p className="text-gray-600 mb-6 leading-relaxed">
+                    分野タグや年度で絞り込んで、個別の問題を詳細に確認・検索できます
+                  </p>
+                  <div className="space-y-2 text-sm text-gray-500">
+                    <div className="flex items-center justify-center">
+                      <Search className="w-4 h-4 mr-2" />
+                      分野別検索
+                    </div>
+                    <div className="flex items-center justify-center">
+                      <FileText className="w-4 h-4 mr-2" />
+                      個別問題画像
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-green-600 text-white py-4 rounded-b-lg text-center font-medium group-hover:bg-green-700 transition-colors">
+                  分野別検索を開く →
+                </div>
+              </div>
+            </Link>
+          </div>
 
-            {/* 検索結果数 */}
-            <div className="flex items-end">
-              <div className="bg-gray-100 px-4 py-2 rounded-md w-full text-center">
-                <span className="text-lg font-semibold">
-                  {loading ? '読み込み中...' : `${filteredQuestions.length}件`}
-                </span>
-                <span className="text-sm text-gray-600 ml-1">の問題</span>
+          {/* 統計情報 */}
+          <div className="mt-12 bg-white rounded-lg shadow-md p-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">
+              データベース概要
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+              <div>
+                <div className="text-2xl font-bold text-blue-600">5年分</div>
+                <div className="text-sm text-gray-600">対象年度</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-green-600">10回分</div>
+                <div className="text-sm text-gray-600">本試験・追試験</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-purple-600">150問+</div>
+                <div className="text-sm text-gray-600">総問題数</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-orange-600">分野別</div>
+                <div className="text-sm text-gray-600">タグ検索</div>
               </div>
             </div>
           </div>
-
-          {/* カテゴリタグ */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Tag className="inline w-4 h-4 mr-1" />
-              分野タグ（複数選択可）
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {categories.map(category => (
-                <button
-                  key={category}
-                  onClick={() => toggleCategory(category)}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                    selectedCategories.includes(category)
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* 結果表示 */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-              <p className="mt-4 text-gray-600">データを読み込み中...</p>
-            </div>
-          ) : filteredQuestions.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-600">条件に該当する問題が見つかりませんでした</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-200">
-              {filteredQuestions.map((question) => (
-                <div key={question.id} className="p-6 hover:bg-gray-50">
-                  {/* 問題ヘッダー */}
-                  <div className="flex justify-between items-center mb-3">
-                    <div className="flex items-center gap-3">
-                      <span className="font-bold text-blue-600">
-                        {question.questionId || 'ID不明'}
-                      </span>
-                      <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
-                        {question.year}年
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* カテゴリ */}
-                  <div className="mb-3">
-                    {question.category?.split(',').map((cat, index) => (
-                      <span
-                        key={index}
-                        className="inline-block bg-green-100 text-green-700 px-2 py-1 rounded-md text-xs mr-2 mb-1"
-                      >
-                        {cat.trim()}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* 問題文 */}
-                  {question.fullQuestionText && (
-                    <div className="mb-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-                      <h3 className="text-sm font-semibold text-blue-700 mb-2">問題文</h3>
-                      <p className="text-gray-800 leading-relaxed">{question.fullQuestionText}</p>
-                    </div>
-                  )}
-
-                  {/* 問題画像 */}
-                  {question.imageUrl && (
-                    <div className="mb-3">
-                      <img
-                        src={convertImageUrl(question.imageUrl)}
-                        alt={`問題 ${question.questionId}`}
-                        className="max-w-full rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-shadow"
-                        onClick={() => window.open(convertImageUrl(question.imageUrl), '_blank')}
-                      />
-                    </div>
-                  )}
-
-                  {/* 正答表示 */}
-                  <div className="bg-orange-50 p-3 rounded-lg">
-                    <button
-                      onClick={() => toggleAnswer(question.id)}
-                      className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors text-sm"
-                    >
-                      {showAnswers[question.id] ? '正答を隠す' : '正答を表示'}
-                    </button>
-                    {showAnswers[question.id] && (
-                      <div className="mt-2 text-lg font-bold text-orange-700">
-                        正答: {question.answer || '未設定'}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </main>
