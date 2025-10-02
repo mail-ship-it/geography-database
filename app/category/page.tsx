@@ -123,12 +123,8 @@ function CategoryPage() {
   }
 
 
+  // APIですでに変換済みのため、URLをそのまま使用
   const convertImageUrl = (url: string) => {
-    if (!url) return ''
-    const match = url.match(/\/file\/d\/([a-zA-Z0-9-_]+)/)
-    if (match) {
-      return `https://drive.google.com/uc?id=${match[1]}`
-    }
     return url
   }
 
