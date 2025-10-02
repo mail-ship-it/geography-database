@@ -6,10 +6,10 @@ function convertDriveUrlToDirectLink(driveUrl: string): string {
   if (!driveUrl) return ''
   
   // Google Drive sharing URL from: https://drive.google.com/file/d/FILE_ID/view?usp=drivesdk
-  // Convert to: https://drive.google.com/uc?id=FILE_ID
+  // Convert to: https://lh3.googleusercontent.com/d/FILE_ID for better CORS support
   const match = driveUrl.match(/\/file\/d\/([a-zA-Z0-9-_]+)/)
   if (match && match[1]) {
-    return `https://drive.google.com/uc?id=${match[1]}`
+    return `https://lh3.googleusercontent.com/d/${match[1]}`
   }
   return driveUrl
 }
