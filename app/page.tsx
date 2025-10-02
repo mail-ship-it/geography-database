@@ -247,22 +247,12 @@ export default function Home() {
                   {/* 問題画像 */}
                   {question.imageUrl && (
                     <div className="mb-3">
-                      <button
-                        onClick={() => toggleAnswer(question.id + '_image')}
-                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors text-sm mb-2"
-                      >
-                        {showAnswers[question.id + '_image'] ? '問題画像を隠す' : '問題画像を表示'}
-                      </button>
-                      {showAnswers[question.id + '_image'] && (
-                        <div>
-                          <img
-                            src={convertImageUrl(question.imageUrl)}
-                            alt={`問題 ${question.questionId}`}
-                            className="max-w-full rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-shadow"
-                            onClick={() => window.open(convertImageUrl(question.imageUrl), '_blank')}
-                          />
-                        </div>
-                      )}
+                      <img
+                        src={convertImageUrl(question.imageUrl)}
+                        alt={`問題 ${question.questionId}`}
+                        className="max-w-full rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                        onClick={() => window.open(convertImageUrl(question.imageUrl), '_blank')}
+                      />
                     </div>
                   )}
 
