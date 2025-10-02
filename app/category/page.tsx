@@ -15,7 +15,7 @@ type Question = {
   fullQuestionText?: string
 }
 
-export default function Home() {
+function CategoryPage() {
   const [questions, setQuestions] = useState<Question[]>([])
   const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([])
   const [categories, setCategories] = useState<string[]>([])
@@ -87,8 +87,11 @@ export default function Home() {
 
   useEffect(() => {
     filterQuestions()
-    setDisplayCount(5) // フィルタ変更時に表示数をリセット
   }, [filterQuestions])
+
+  useEffect(() => {
+    setDisplayCount(5) // フィルタ変更時に表示数をリセット
+  }, [selectedYear, selectedCategories, searchText])
 
   const toggleCategory = (category: string) => {
     setSelectedCategories(prev =>
@@ -230,7 +233,7 @@ export default function Home() {
           ) : (
             <>
               <div className="divide-y divide-gray-200">
-                {filteredQuestions.slice(0, displayCount).map((question) => (
+                {(filteredQuestions || []).slice(0, displayCount).map((question) => (
                   <div key={question.id} className="p-6 hover:bg-gray-50">
                     {/* 問題ヘッダー */}
                     <div className="flex justify-between items-center mb-3">
@@ -306,13 +309,13 @@ export default function Home() {
               </div>
               
               {/* さらに読み込むボタン */}
-              {displayCount < filteredQuestions.length && (
+              {displayCount < (filteredQuestions || []).length && (
                 <div className="text-center py-6">
                   <button
                     onClick={loadMore}
                     className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium"
                   >
-                    さらに読み込む ({displayCount}/{filteredQuestions.length}問表示中)
+                    さらに読み込む ({displayCount}/{(filteredQuestions || []).length}問表示中)
                   </button>
                 </div>
               )}
@@ -323,3 +326,5 @@ export default function Home() {
     </main>
   )
 }
+
+export default CategoryPage
