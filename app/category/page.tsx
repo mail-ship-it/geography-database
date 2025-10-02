@@ -24,6 +24,8 @@ export default function Home() {
   const [searchText, setSearchText] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [showAnswers, setShowAnswers] = useState<{ [key: string]: boolean }>({})
+  const [showImages, setShowImages] = useState<{ [key: string]: boolean }>({})
+  const [displayCount, setDisplayCount] = useState(5)
 
   const fetchQuestions = async () => {
     try {
@@ -85,6 +87,7 @@ export default function Home() {
 
   useEffect(() => {
     filterQuestions()
+    setDisplayCount(5) // フィルタ変更時に表示数をリセット
   }, [filterQuestions])
 
   const toggleCategory = (category: string) => {
@@ -100,6 +103,22 @@ export default function Home() {
       ...prev,
       [questionId]: !prev[questionId]
     }))
+  }
+
+  const toggleImage = (questionId: string) => {
+    setShowImages(prev => ({
+      ...prev,
+      [questionId]: !prev[questionId]
+    }))
+  }
+
+  const isImageVisible = (questionId: string) => {
+    // デフォルトで表示（showImages[questionId]がfalseの時のみ非表示）
+    return showImages[questionId] !== false
+  }
+
+  const loadMore = () => {
+    setDisplayCount(prev => prev + 5)
   }
 
   const convertImageUrl = (url: string) => {
@@ -210,7 +229,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
-              {filteredQuestions.map((question) => (
+              {filteredQuestions.slice(0, displayCount).map((question) => (
                 <div key={question.id} className="p-6 hover:bg-gray-50">
                   {/* 問題ヘッダー */}
                   <div className="flex justify-between items-center mb-3">
@@ -248,17 +267,22 @@ export default function Home() {
                   {question.imageUrl && (
                     <div className="mb-3">
                       <button
-                        onClick={() => window.open(convertImageUrl(question.imageUrl), '_blank')}
-                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors text-sm mb-3"
+                        onClick={() => toggleImage(question.id)}
+                        className={`px-4 py-2 rounded-md transition-colors text-sm mb-3 ${
+                          isImageVisible(question.id)
+                            ? 'bg-red-500 text-white hover:bg-red-600'
+                            : 'bg-blue-500 text-white hover:bg-blue-600'
+                        }`}
                       >
-                        問題を表示
+                        {isImageVisible(question.id) ? '問題を非表示' : '問題を表示'}
                       </button>
-                      <img
-                        src={convertImageUrl(question.imageUrl)}
-                        alt={`問題 ${question.questionId}`}
-                        className="max-w-full rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-shadow"
-                        onClick={() => window.open(convertImageUrl(question.imageUrl), '_blank')}
-                      />
+                      {isImageVisible(question.id) && (
+                        <img
+                          src={convertImageUrl(question.imageUrl)}
+                          alt={`問題 ${question.questionId}`}
+                          className="max-w-full rounded-lg shadow-sm"
+                        />
+                      )}
                     </div>
                   )}
 
@@ -279,6 +303,18 @@ export default function Home() {
                 </div>
               ))}
             </div>
+            
+            {/* さらに読み込むボタン */}
+            {displayCount < filteredQuestions.length && (
+              <div className="text-center py-6">
+                <button
+                  onClick={loadMore}
+                  className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                >
+                  さらに読み込む ({displayCount}/{filteredQuestions.length}問表示中)
+                </button>
+              </div>
+            )}
           )}
         </div>
       </div>
