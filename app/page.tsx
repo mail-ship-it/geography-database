@@ -12,6 +12,7 @@ type Question = {
   imageUrl: string
   year: string
   questionText?: string
+  fullQuestionText?: string
 }
 
 export default function Home() {
@@ -68,7 +69,8 @@ export default function Home() {
       filtered = filtered.filter(q => 
         q.questionId?.toLowerCase().includes(lower) ||
         q.category?.toLowerCase().includes(lower) ||
-        q.questionText?.toLowerCase().includes(lower)
+        q.questionText?.toLowerCase().includes(lower) ||
+        q.fullQuestionText?.toLowerCase().includes(lower)
       )
     }
 
@@ -231,6 +233,14 @@ export default function Home() {
                       </span>
                     ))}
                   </div>
+
+                  {/* 問題文 */}
+                  {question.fullQuestionText && (
+                    <div className="mb-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                      <h3 className="text-sm font-semibold text-blue-700 mb-2">問題文</h3>
+                      <p className="text-gray-800 leading-relaxed">{question.fullQuestionText}</p>
+                    </div>
+                  )}
 
                   {/* 問題画像 */}
                   {question.imageUrl && (

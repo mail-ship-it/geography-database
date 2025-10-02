@@ -26,4 +26,5 @@ export type Question = {
   createdDate: string
   imageFile: string
   questionText: string
+  fullQuestionText: string
 }

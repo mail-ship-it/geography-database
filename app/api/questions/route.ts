@@ -49,7 +49,8 @@ export async function GET() {
       notes: row[6] || '', // G列: ノート
       createdDate: row[7] || '', // H列: 作成日
       imageFile: row[8] || '', // I列: 元のGoogle Drive URL
-      questionText: row[9] || '' // J列: OCR問題文
+      questionText: row[9] || '', // J列: OCRキーワード
+      fullQuestionText: row[10] || '' // K列: 問題文全文
     }))
 
     return NextResponse.json(questions)
