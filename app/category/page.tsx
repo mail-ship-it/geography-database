@@ -24,7 +24,7 @@ function CategoryPage() {
   const [searchText, setSearchText] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [showAnswers, setShowAnswers] = useState<{ [key: string]: boolean }>({})
-  const [showImages, setShowImages] = useState<{ [key: string]: boolean }>({})
+  // const [showImages, setShowImages] = useState<{ [key: string]: boolean }>({})
 
   const fetchQuestions = async () => {
     try {
@@ -104,17 +104,7 @@ function CategoryPage() {
     }))
   }
 
-  const toggleImage = (questionId: string) => {
-    setShowImages(prev => ({
-      ...prev,
-      [questionId]: !prev[questionId]
-    }))
-  }
-
-  const isImageVisible = (questionId: string) => {
-    // デフォルトで表示（showImages[questionId]がfalseの時のみ非表示）
-    return showImages[questionId] !== false
-  }
+  // 画像は常に表示するため、トグル機能を削除
 
 
   const convertImageUrl = (url: string) => {
@@ -262,23 +252,11 @@ function CategoryPage() {
                     {/* 問題画像 */}
                     {question.imageUrl && (
                       <div className="mb-3">
-                        <button
-                          onClick={() => toggleImage(question.id)}
-                          className={`px-4 py-2 rounded-md transition-colors text-sm mb-3 ${
-                            isImageVisible(question.id)
-                              ? 'bg-red-500 text-white hover:bg-red-600'
-                              : 'bg-blue-500 text-white hover:bg-blue-600'
-                          }`}
-                        >
-                          {isImageVisible(question.id) ? '問題を非表示' : '問題を表示'}
-                        </button>
-                        {isImageVisible(question.id) && (
-                          <img
-                            src={convertImageUrl(question.imageUrl)}
-                            alt={`問題 ${question.questionId}`}
-                            className="max-w-full rounded-lg shadow-sm"
-                          />
-                        )}
+                        <img
+                          src={convertImageUrl(question.imageUrl)}
+                          alt={`問題 ${question.questionId}`}
+                          className="max-w-full rounded-lg shadow-sm"
+                        />
                       </div>
                     )}
 

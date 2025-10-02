@@ -12,7 +12,7 @@ export const getGoogleSheetsClient = () => {
 }
 
 export const SPREADSHEET_ID = '17cxHniOQP2C7QKCV8nqnn3IKEcd1HwWiDgExGb6FfEE'
-export const SHEET_NAME = '2024年共通テスト地理B'
+export const SHEET_NAME = '2024年本試験'
 
 export type Question = {
   id: string
