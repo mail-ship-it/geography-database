@@ -11,6 +11,7 @@ type Question = {
   correctRate: string
   imageUrl: string
   year: string
+  questionText?: string
 }
 
 export default function Home() {
@@ -66,7 +67,8 @@ export default function Home() {
       const lower = searchText.toLowerCase()
       filtered = filtered.filter(q => 
         q.questionId?.toLowerCase().includes(lower) ||
-        q.category?.toLowerCase().includes(lower)
+        q.category?.toLowerCase().includes(lower) ||
+        q.questionText?.toLowerCase().includes(lower)
       )
     }
 

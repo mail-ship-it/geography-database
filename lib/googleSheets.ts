@@ -25,4 +25,5 @@ export type Question = {
   notes: string
   createdDate: string
   imageFile: string
+  questionText: string
 }

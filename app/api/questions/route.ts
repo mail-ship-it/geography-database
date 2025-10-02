@@ -48,7 +48,8 @@ export async function GET() {
       year: '2024', // 固定値
       notes: row[6] || '', // G列: ノート
       createdDate: row[7] || '', // H列: 作成日
-      imageFile: row[8] || '' // I列: 元のGoogle Drive URL
+      imageFile: row[8] || '', // I列: 元のGoogle Drive URL
+      questionText: row[10] || '' // K列: 問題文・キーワード
     }))
 
     return NextResponse.json(questions)
