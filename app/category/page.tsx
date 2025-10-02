@@ -215,11 +215,11 @@ export default function Home() {
                   {/* 問題ヘッダー */}
                   <div className="flex justify-between items-center mb-3">
                     <div className="flex items-center gap-3">
-                      <span className="font-bold text-blue-600">
-                        {question.questionId || 'ID不明'}
-                      </span>
                       <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
                         {question.year}年
+                      </span>
+                      <span className="font-bold text-blue-600">
+                        問題番号{question.questionId || 'ID不明'}
                       </span>
                     </div>
                   </div>
@@ -247,6 +247,12 @@ export default function Home() {
                   {/* 問題画像 */}
                   {question.imageUrl && (
                     <div className="mb-3">
+                      <button
+                        onClick={() => window.open(convertImageUrl(question.imageUrl), '_blank')}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors text-sm mb-3"
+                      >
+                        問題を表示
+                      </button>
                       <img
                         src={convertImageUrl(question.imageUrl)}
                         alt={`問題 ${question.questionId}`}
