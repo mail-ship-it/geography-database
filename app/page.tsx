@@ -60,7 +60,7 @@ export default function Home() {
 
     if (selectedCategories.length > 0) {
       filtered = filtered.filter(q => 
-        selectedCategories.some(cat => q.category?.includes(cat))
+        selectedCategories.every(cat => q.category?.includes(cat))
       )
     }
 
@@ -214,12 +214,14 @@ export default function Home() {
                 <div key={question.id} className="p-6 hover:bg-gray-50">
                   {/* 問題ヘッダー */}
                   <div className="flex justify-between items-center mb-3">
-                    <span className="font-bold text-blue-600">
-                      {question.questionId || 'ID不明'}
-                    </span>
-                    <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
-                      {question.year}年
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <span className="font-bold text-blue-600">
+                        {question.questionId || 'ID不明'}
+                      </span>
+                      <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
+                        {question.year}年
+                      </span>
+                    </div>
                   </div>
 
                   {/* カテゴリ */}
@@ -245,12 +247,22 @@ export default function Home() {
                   {/* 問題画像 */}
                   {question.imageUrl && (
                     <div className="mb-3">
-                      <img
-                        src={convertImageUrl(question.imageUrl)}
-                        alt={`問題 ${question.questionId}`}
-                        className="max-w-full rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-shadow"
-                        onClick={() => window.open(convertImageUrl(question.imageUrl), '_blank')}
-                      />
+                      <button
+                        onClick={() => toggleAnswer(question.id + '_image')}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors text-sm mb-2"
+                      >
+                        {showAnswers[question.id + '_image'] ? '問題画像を隠す' : '問題画像を表示'}
+                      </button>
+                      {showAnswers[question.id + '_image'] && (
+                        <div>
+                          <img
+                            src={convertImageUrl(question.imageUrl)}
+                            alt={`問題 ${question.questionId}`}
+                            className="max-w-full rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                            onClick={() => window.open(convertImageUrl(question.imageUrl), '_blank')}
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
 
