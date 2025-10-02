@@ -228,93 +228,95 @@ export default function Home() {
               <p className="text-gray-600">条件に該当する問題が見つかりませんでした</p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-200">
-              {filteredQuestions.slice(0, displayCount).map((question) => (
-                <div key={question.id} className="p-6 hover:bg-gray-50">
-                  {/* 問題ヘッダー */}
-                  <div className="flex justify-between items-center mb-3">
-                    <div className="flex items-center gap-3">
-                      <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
-                        {question.year}年
-                      </span>
-                      <span className="font-bold text-blue-600">
-                        問題番号{question.questionId || 'ID不明'}
-                      </span>
+            <>
+              <div className="divide-y divide-gray-200">
+                {filteredQuestions.slice(0, displayCount).map((question) => (
+                  <div key={question.id} className="p-6 hover:bg-gray-50">
+                    {/* 問題ヘッダー */}
+                    <div className="flex justify-between items-center mb-3">
+                      <div className="flex items-center gap-3">
+                        <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
+                          {question.year}年
+                        </span>
+                        <span className="font-bold text-blue-600">
+                          問題番号{question.questionId || 'ID不明'}
+                        </span>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* カテゴリ */}
-                  <div className="mb-3">
-                    {question.category?.split(',').map((cat, index) => (
-                      <span
-                        key={index}
-                        className="inline-block bg-green-100 text-green-700 px-2 py-1 rounded-md text-xs mr-2 mb-1"
-                      >
-                        {cat.trim()}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* 問題文 */}
-                  {question.fullQuestionText && (
-                    <div className="mb-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-                      <h3 className="text-sm font-semibold text-blue-700 mb-2">問題文</h3>
-                      <p className="text-gray-800 leading-relaxed">{question.fullQuestionText}</p>
-                    </div>
-                  )}
-
-                  {/* 問題画像 */}
-                  {question.imageUrl && (
+                    {/* カテゴリ */}
                     <div className="mb-3">
-                      <button
-                        onClick={() => toggleImage(question.id)}
-                        className={`px-4 py-2 rounded-md transition-colors text-sm mb-3 ${
-                          isImageVisible(question.id)
-                            ? 'bg-red-500 text-white hover:bg-red-600'
-                            : 'bg-blue-500 text-white hover:bg-blue-600'
-                        }`}
-                      >
-                        {isImageVisible(question.id) ? '問題を非表示' : '問題を表示'}
-                      </button>
-                      {isImageVisible(question.id) && (
-                        <img
-                          src={convertImageUrl(question.imageUrl)}
-                          alt={`問題 ${question.questionId}`}
-                          className="max-w-full rounded-lg shadow-sm"
-                        />
-                      )}
+                      {question.category?.split(',').map((cat, index) => (
+                        <span
+                          key={index}
+                          className="inline-block bg-green-100 text-green-700 px-2 py-1 rounded-md text-xs mr-2 mb-1"
+                        >
+                          {cat.trim()}
+                        </span>
+                      ))}
                     </div>
-                  )}
 
-                  {/* 正答表示 */}
-                  <div className="bg-orange-50 p-3 rounded-lg">
-                    <button
-                      onClick={() => toggleAnswer(question.id)}
-                      className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors text-sm"
-                    >
-                      {showAnswers[question.id] ? '正答を隠す' : '正答を表示'}
-                    </button>
-                    {showAnswers[question.id] && (
-                      <div className="mt-2 text-lg font-bold text-orange-700">
-                        正答: {question.answer || '未設定'}
+                    {/* 問題文 */}
+                    {question.fullQuestionText && (
+                      <div className="mb-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                        <h3 className="text-sm font-semibold text-blue-700 mb-2">問題文</h3>
+                        <p className="text-gray-800 leading-relaxed">{question.fullQuestionText}</p>
                       </div>
                     )}
+
+                    {/* 問題画像 */}
+                    {question.imageUrl && (
+                      <div className="mb-3">
+                        <button
+                          onClick={() => toggleImage(question.id)}
+                          className={`px-4 py-2 rounded-md transition-colors text-sm mb-3 ${
+                            isImageVisible(question.id)
+                              ? 'bg-red-500 text-white hover:bg-red-600'
+                              : 'bg-blue-500 text-white hover:bg-blue-600'
+                          }`}
+                        >
+                          {isImageVisible(question.id) ? '問題を非表示' : '問題を表示'}
+                        </button>
+                        {isImageVisible(question.id) && (
+                          <img
+                            src={convertImageUrl(question.imageUrl)}
+                            alt={`問題 ${question.questionId}`}
+                            className="max-w-full rounded-lg shadow-sm"
+                          />
+                        )}
+                      </div>
+                    )}
+
+                    {/* 正答表示 */}
+                    <div className="bg-orange-50 p-3 rounded-lg">
+                      <button
+                        onClick={() => toggleAnswer(question.id)}
+                        className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors text-sm"
+                      >
+                        {showAnswers[question.id] ? '正答を隠す' : '正答を表示'}
+                      </button>
+                      {showAnswers[question.id] && (
+                        <div className="mt-2 text-lg font-bold text-orange-700">
+                          正答: {question.answer || '未設定'}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-            
-            {/* さらに読み込むボタン */}
-            {displayCount < filteredQuestions.length && (
-              <div className="text-center py-6">
-                <button
-                  onClick={loadMore}
-                  className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium"
-                >
-                  さらに読み込む ({displayCount}/{filteredQuestions.length}問表示中)
-                </button>
+                ))}
               </div>
-            )}
+              
+              {/* さらに読み込むボタン */}
+              {displayCount < filteredQuestions.length && (
+                <div className="text-center py-6">
+                  <button
+                    onClick={loadMore}
+                    className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                  >
+                    さらに読み込む ({displayCount}/{filteredQuestions.length}問表示中)
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
