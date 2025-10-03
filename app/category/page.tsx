@@ -29,16 +29,30 @@ function CategoryPage() {
 
   const fetchQuestions = async () => {
     try {
-      const response = await fetch('/api/questions')
-      const data = await response.json()
-      console.log('API Response:', data)
-      console.log('Data length:', data.length)
-      console.log('First item:', data[0])
-      setQuestions(data)
-      
+      // 全年度・全試験種別のデータを取得
+      const years = [2021, 2022, 2023, 2024, 2025]
+      const examTypes = ['honshiken', 'tsuishiken']
+
+      const allQuestions: Question[] = []
+
+      for (const year of years) {
+        for (const examType of examTypes) {
+          const response = await fetch(`/api/questions?year=${year}&examType=${examType}`)
+          const data = await response.json()
+          if (Array.isArray(data) && data.length > 0) {
+            allQuestions.push(...data)
+          }
+        }
+      }
+
+      console.log('API Response:', allQuestions)
+      console.log('Data length:', allQuestions.length)
+      console.log('First item:', allQuestions[0])
+      setQuestions(allQuestions)
+
       // カテゴリを抽出
       const allCategories = new Set<string>()
-      data.forEach((q: Question) => {
+      allQuestions.forEach((q: Question) => {
         if (q.category) {
           q.category.split(',').forEach(cat => allCategories.add(cat.trim()))
         }
