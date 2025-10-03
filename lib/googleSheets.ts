@@ -31,7 +31,9 @@ export const SHEET_NAMES: { [key: string]: string } = {
 export type Question = {
   id: string
   questionId: string
-  category: string
+  category: string // 元の形式: "気候,日本|ハイサーグラフ"
+  mainTags: string[] // パース後: ["気候", "日本"]
+  subTags: string[] // パース後: ["ハイサーグラフ"]
   answer: string
   correctRate: string
   imageUrl: string
@@ -41,4 +43,17 @@ export type Question = {
   imageFile: string
   questionText: string
   fullQuestionText: string
+}
+
+// タグをパースする関数
+export function parseTags(categoryString: string): { mainTags: string[], subTags: string[] } {
+  if (!categoryString) {
+    return { mainTags: [], subTags: [] }
+  }
+
+  const parts = categoryString.split('|')
+  const mainTags = parts[0] ? parts[0].split(',').map(t => t.trim()).filter(t => t) : []
+  const subTags = parts[1] ? parts[1].split(',').map(t => t.trim()).filter(t => t) : []
+
+  return { mainTags, subTags }
 }
