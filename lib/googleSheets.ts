@@ -11,7 +11,7 @@ export const getGoogleSheetsClient = () => {
   return google.sheets({ version: 'v4', auth })
 }
 
-export const SPREADSHEET_ID = '1eqwocYOk34aANN78AuRzocV6l7NJll79yI_YOR3eocw'
+export const SPREADSHEET_ID = '17cxHniOQP2C7QKCV8nqnn3IKEcd1HwWiDgExGb6FfEE'
 export const SHEET_NAME = '2024年本試験'
 
 // シート名マッピング

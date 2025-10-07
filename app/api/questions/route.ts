@@ -1,15 +1,16 @@
 import { NextResponse } from 'next/server'
 import { getGoogleSheetsClient, SPREADSHEET_ID, SHEET_NAMES, Question, parseTags } from '@/lib/googleSheets'
 
-// Google Drive URL を直接表示可能なURLに変換
+// Google Drive URL を画像表示可能な形式に変換
 function convertDriveUrlToDirectLink(driveUrl: string): string {
   if (!driveUrl) return ''
 
-  // Google Drive sharing URL from: https://drive.google.com/file/d/FILE_ID/view?usp=drivesdk
-  // Convert to direct link: https://drive.google.com/uc?export=view&id=FILE_ID
+  // FILE_IDを抽出
   const match = driveUrl.match(/\/file\/d\/([a-zA-Z0-9-_]+)/)
   if (match && match[1]) {
-    return `https://drive.google.com/uc?export=view&id=${match[1]}`
+    // 画像を直接表示できる形式に変換
+    // https://drive.google.com/thumbnail?id=FILE_ID&sz=w1000
+    return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w2000`
   }
   return driveUrl
 }
