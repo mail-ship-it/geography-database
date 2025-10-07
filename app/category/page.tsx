@@ -247,11 +247,8 @@ function CategoryPage() {
                     {/* 問題ヘッダー */}
                     <div className="flex justify-between items-center mb-3">
                       <div className="flex items-center gap-3">
-                        <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
-                          {question.year}年
-                        </span>
                         <span className="font-bold text-blue-600">
-                          問題番号{question.questionId || 'ID不明'}
+                          {question.questionId || 'ID不明'}
                         </span>
                       </div>
                     </div>
@@ -278,10 +275,10 @@ function CategoryPage() {
 
                     {/* 問題画像 */}
                     {question.imageUrl && (
-                      <div className="mb-3">
+                      <div className="mb-4">
                         <button
                           onClick={() => toggleImage(question.id)}
-                          className={`px-4 py-2 rounded-md transition-colors text-sm mb-3 ${
+                          className={`px-4 py-2 rounded-md transition-colors text-sm ${
                             isImageVisible(question.id)
                               ? 'bg-red-500 text-white hover:bg-red-600'
                               : 'bg-blue-500 text-white hover:bg-blue-600'
@@ -290,17 +287,19 @@ function CategoryPage() {
                           {isImageVisible(question.id) ? '問題を非表示' : '問題を表示'}
                         </button>
                         {isImageVisible(question.id) && (
-                          <img
-                            src={convertImageUrl(question.imageUrl)}
-                            alt={`問題 ${question.questionId}`}
-                            className="max-w-full rounded-lg shadow-sm"
-                          />
+                          <div className="mt-3">
+                            <img
+                              src={convertImageUrl(question.imageUrl)}
+                              alt={`問題 ${question.questionId}`}
+                              className="max-w-full rounded-lg shadow-sm"
+                            />
+                          </div>
                         )}
                       </div>
                     )}
 
                     {/* 正答表示 */}
-                    <div className="bg-orange-50 p-3 rounded-lg">
+                    <div>
                       <button
                         onClick={() => toggleAnswer(question.id)}
                         className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors text-sm"
@@ -308,8 +307,10 @@ function CategoryPage() {
                         {showAnswers[question.id] ? '正答を隠す' : '正答を表示'}
                       </button>
                       {showAnswers[question.id] && (
-                        <div className="mt-2 text-lg font-bold text-orange-700">
-                          正答: {question.answer || '未設定'}
+                        <div className="mt-3 p-3 bg-orange-50 rounded-lg">
+                          <div className="text-lg font-bold text-orange-700">
+                            正答: {question.answer || '未設定'}
+                          </div>
                         </div>
                       )}
                     </div>
