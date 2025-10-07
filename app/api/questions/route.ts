@@ -60,7 +60,7 @@ export async function GET(request: Request) {
 
       return {
         id: (index + 1).toString(),
-        questionId: row[1] || '', // B列: 問題ID（2024_honshiken_1など）
+        questionId: row[1] || '', // B列: 問題ID（2024_本試験_1など）
         category: categoryString, // C列: 元の形式（気候,日本|ハイサーグラフ）
         mainTags, // パース後: ["気候", "日本"]
         subTags, // パース後: ["ハイサーグラフ"]
