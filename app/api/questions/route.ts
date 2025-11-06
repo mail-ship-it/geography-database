@@ -5,12 +5,16 @@ import { getGoogleSheetsClient, SPREADSHEET_ID, SHEET_NAMES, Question, parseTags
 function convertDriveUrlToDirectLink(driveUrl: string): string {
   if (!driveUrl) return ''
 
+  // 既に直接表示形式の場合はそのまま返す
+  if (driveUrl.includes('drive.google.com/uc?export=view')) {
+    return driveUrl
+  }
+
   // FILE_IDを抽出
   const match = driveUrl.match(/\/file\/d\/([a-zA-Z0-9-_]+)/)
   if (match && match[1]) {
     // 画像を直接表示できる形式に変換
-    // https://drive.google.com/thumbnail?id=FILE_ID&sz=w1000
-    return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w2000`
+    return `https://drive.google.com/uc?export=view&id=${match[1]}`
   }
   return driveUrl
 }
@@ -66,11 +70,11 @@ export async function GET(request: Request) {
         subTags, // パース後: ["ハイサーグラフ"]
         answer: row[3] || '', // D列: 正答
         correctRate: row[4] || '', // E列: 正答率
-        imageUrl: convertDriveUrlToDirectLink(row[8] || ''), // I列: Google Drive URL → 直接表示可能URL
+        imageUrl: convertDriveUrlToDirectLink(row[7] || ''), // H列: Google Drive URL → 直接表示可能URL
         year: year, // URLパラメータから取得
         notes: row[6] || '', // G列: ノート
         createdDate: row[5] || '', // F列: 作成日
-        imageFile: row[7] || '', // H列: 画像ファイル名
+        imageFile: row[7] || '', // H列: 画像URL（新形式）
         questionText: row[9] || '', // J列: OCRキーワード
         fullQuestionText: row[10] || '' // K列: 問題文全文
       }
