@@ -20,7 +20,7 @@ function CategoryPage() {
   const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([])
   const [categories, setCategories] = useState<string[]>([])
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [selectedYear, setSelectedYear] = useState<string>('')
+  const [selectedYearExam, setSelectedYearExam] = useState<string>('')
   const [searchText, setSearchText] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [showAnswers, setShowAnswers] = useState<{ [key: string]: boolean }>({})
@@ -70,19 +70,19 @@ function CategoryPage() {
     console.log('Filtering with questions:', questions)
     console.log('Questions length:', questions.length)
 
-    if (selectedYear) {
-      filtered = filtered.filter(q => q.year === selectedYear)
+    if (selectedYearExam) {
+      filtered = filtered.filter(q => q.questionId?.includes(selectedYearExam))
     }
 
     if (selectedCategories.length > 0) {
-      filtered = filtered.filter(q => 
+      filtered = filtered.filter(q =>
         selectedCategories.every(cat => q.category?.includes(cat))
       )
     }
 
     if (searchText) {
       const lower = searchText.toLowerCase()
-      filtered = filtered.filter(q => 
+      filtered = filtered.filter(q =>
         q.questionId?.toLowerCase().includes(lower) ||
         q.category?.toLowerCase().includes(lower) ||
         q.questionText?.toLowerCase().includes(lower) ||
@@ -93,7 +93,7 @@ function CategoryPage() {
     console.log('Filtered questions:', filtered)
     console.log('Filtered length:', filtered.length)
     setFilteredQuestions(filtered)
-  }, [questions, selectedYear, selectedCategories, searchText])
+  }, [questions, selectedYearExam, selectedCategories, searchText])
 
   useEffect(() => {
     fetchQuestions()
@@ -160,20 +160,23 @@ function CategoryPage() {
       <div className="container mx-auto px-4 py-6">
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            {/* 年度選択 */}
+            {/* 年度・試験種別選択 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Calendar className="inline w-4 h-4 mr-1" />
-                年度
+                年度・試験種別
               </label>
               <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(e.target.value)}
+                value={selectedYearExam}
+                onChange={(e) => setSelectedYearExam(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">全年度</option>
+                <option value="">全て</option>
                 {[2025, 2024, 2023, 2022, 2021].map(year => (
-                  <option key={year} value={year.toString()}>{year}年</option>
+                  <>
+                    <option key={`${year}_本試験`} value={`${year}_本試験`}>{year}年 本試験</option>
+                    <option key={`${year}_追試験`} value={`${year}_追試験`}>{year}年 追試験</option>
+                  </>
                 ))}
               </select>
             </div>
