@@ -5,17 +5,28 @@ import { getGoogleSheetsClient, SPREADSHEET_ID, SHEET_NAMES, Question, parseTags
 function convertDriveUrlToDirectLink(driveUrl: string): string {
   if (!driveUrl) return ''
 
-  // 既に直接表示形式の場合はそのまま返す
-  if (driveUrl.includes('drive.google.com/uc?export=view')) {
-    return driveUrl
+  // FILE_IDを抽出（様々な形式に対応）
+  let fileId = ''
+
+  // 形式1: https://drive.google.com/uc?export=view&id=FILE_ID
+  const ucMatch = driveUrl.match(/[?&]id=([a-zA-Z0-9-_]+)/)
+  if (ucMatch && ucMatch[1]) {
+    fileId = ucMatch[1]
   }
 
-  // FILE_IDを抽出
-  const match = driveUrl.match(/\/file\/d\/([a-zA-Z0-9-_]+)/)
-  if (match && match[1]) {
-    // 画像を直接表示できる形式に変換
-    return `https://drive.google.com/uc?export=view&id=${match[1]}`
+  // 形式2: https://drive.google.com/file/d/FILE_ID/view
+  if (!fileId) {
+    const fileMatch = driveUrl.match(/\/file\/d\/([a-zA-Z0-9-_]+)/)
+    if (fileMatch && fileMatch[1]) {
+      fileId = fileMatch[1]
+    }
   }
+
+  if (fileId) {
+    // Googleusercontent経由で画像を直接表示
+    return `https://lh3.googleusercontent.com/d/${fileId}`
+  }
+
   return driveUrl
 }
 
