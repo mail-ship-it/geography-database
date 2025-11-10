@@ -14,7 +14,7 @@ export const getGoogleSheetsClient = () => {
 export const SPREADSHEET_ID = '1eqwocYOk34aANN78AuRzocV6l7NJll79yI_YOR3eocw'
 export const SHEET_NAME = '2024年本試験'
 
-// シート名マッピング
+// シート名マッピング（後方互換性のため保持）
 export const SHEET_NAMES: { [key: string]: string } = {
   '2021_honshiken': '2021年本試験',
   '2021_tsuishiken': '2021年追試験',
@@ -26,6 +26,12 @@ export const SHEET_NAMES: { [key: string]: string } = {
   '2024_tsuishiken': '2024年追試験',
   '2025_honshiken': '2025年本試験',
   '2025_tsuishiken': '2025年追試験',
+}
+
+// 動的にシート名を生成する関数
+export function getSheetName(year: string, examType: string): string {
+  const examTypeJa = examType === 'honshiken' ? '本試験' : '追試験'
+  return `${year}年${examTypeJa}`
 }
 
 export type Question = {

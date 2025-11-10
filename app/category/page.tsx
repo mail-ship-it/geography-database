@@ -26,38 +26,48 @@ function CategoryPage() {
   const [showAnswers, setShowAnswers] = useState<{ [key: string]: boolean }>({})
   const [showImages, setShowImages] = useState<{ [key: string]: boolean }>({})
   const [displayCount, setDisplayCount] = useState(5)
+  const [availableYearExams, setAvailableYearExams] = useState<string[]>([])
 
   const fetchQuestions = async () => {
     try {
-      // 全年度・全試験種別のデータを取得
-      const years = [2021, 2022, 2023, 2024, 2025]
-      const examTypes = ['honshiken', 'tsuishiken']
+      // 1. まずシート情報を取得
+      const sheetInfoResponse = await fetch('/api/sheet-info')
+      const sheetInfoData = await sheetInfoResponse.json()
 
-      const allQuestions: Question[] = []
+      if (sheetInfoData.yearExams && Array.isArray(sheetInfoData.yearExams)) {
+        // 年度・試験種別リストを設定
+        const yearExamOptions = sheetInfoData.yearExams.map(
+          (item: { displayName: string }) => item.displayName
+        )
+        setAvailableYearExams(yearExamOptions)
 
-      for (const year of years) {
-        for (const examType of examTypes) {
-          const response = await fetch(`/api/questions?year=${year}&examType=${examType}`)
+        // 2. 各シートからデータを取得
+        const allQuestions: Question[] = []
+
+        for (const item of sheetInfoData.yearExams) {
+          const examType = item.examType === '本試験' ? 'honshiken' : 'tsuishiken'
+          const response = await fetch(`/api/questions?year=${item.year}&examType=${examType}`)
           const data = await response.json()
+
           if (Array.isArray(data) && data.length > 0) {
             allQuestions.push(...data)
           }
         }
+
+        console.log('API Response:', allQuestions)
+        console.log('Data length:', allQuestions.length)
+        setQuestions(allQuestions)
+
+        // カテゴリを抽出
+        const allCategories = new Set<string>()
+        allQuestions.forEach((q: Question) => {
+          if (q.category) {
+            q.category.split(',').forEach(cat => allCategories.add(cat.trim()))
+          }
+        })
+        setCategories(Array.from(allCategories).sort())
       }
 
-      console.log('API Response:', allQuestions)
-      console.log('Data length:', allQuestions.length)
-      console.log('First item:', allQuestions[0])
-      setQuestions(allQuestions)
-
-      // カテゴリを抽出
-      const allCategories = new Set<string>()
-      allQuestions.forEach((q: Question) => {
-        if (q.category) {
-          q.category.split(',').forEach(cat => allCategories.add(cat.trim()))
-        }
-      })
-      setCategories(Array.from(allCategories).sort())
       setLoading(false)
     } catch (error) {
       console.error('Error fetching questions:', error)
@@ -172,11 +182,10 @@ function CategoryPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">全て</option>
-                {[2025, 2024, 2023, 2022, 2021].map(year => (
-                  <>
-                    <option key={`${year}_本試験`} value={`${year}_本試験`}>{year}年 本試験</option>
-                    <option key={`${year}_追試験`} value={`${year}_追試験`}>{year}年 追試験</option>
-                  </>
+                {availableYearExams.map(yearExam => (
+                  <option key={yearExam} value={yearExam}>
+                    {yearExam}
+                  </option>
                 ))}
               </select>
             </div>
