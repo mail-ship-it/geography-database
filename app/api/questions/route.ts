@@ -77,8 +77,8 @@ export async function GET(request: Request) {
         id: (index + 1).toString(),
         questionId: row[1] || '', // B列: 問題ID（2024_本試験_1など）
         category: mainTagsString, // C列: メインタグ
-        mainTags: mainTagsString ? mainTagsString.split(',').map(t => t.trim()) : [], // メインタグを配列に
-        subTags: subTagsString ? subTagsString.split(',').map(t => t.trim()) : [], // サブタグを配列に
+        mainTags: mainTagsString ? mainTagsString.split(',').map((t: string) => t.trim()) : [], // メインタグを配列に
+        subTags: subTagsString ? subTagsString.split(',').map((t: string) => t.trim()) : [], // サブタグを配列に
         answer: row[4] || '', // E列: 正答選択肢
         correctRate: row[5] || '', // F列: 正答率
         difficulty: row[6] || '', // G列: 難易度（A-E）
