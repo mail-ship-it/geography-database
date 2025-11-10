@@ -80,9 +80,9 @@ export async function GET(request: Request) {
         mainTags: mainTagsString ? mainTagsString.split(',').map(t => t.trim()) : [], // メインタグを配列に
         subTags: subTagsString ? subTagsString.split(',').map(t => t.trim()) : [], // サブタグを配列に
         answer: row[4] || '', // E列: 正答選択肢
-        correctRate: row[7] || '', // H列: 正答率
-        difficulty: row[5] || '', // F列: 難易度（A-E）
-        isImportant: row[6] || '', // G列: 重要問題
+        correctRate: row[5] || '', // F列: 正答率
+        difficulty: row[6] || '', // G列: 難易度（A-E）
+        isImportant: row[7] || '', // H列: 重要問題
         imageUrl: convertDriveUrlToDirectLink(row[9] || ''), // J列: Google Drive URL → 直接表示可能URL
         year: year, // URLパラメータから取得
         notes: row[8] || '', // I列: 備考
