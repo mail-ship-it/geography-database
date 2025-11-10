@@ -42,6 +42,8 @@ export type Question = {
   subTags: string[] // パース後: ["ハイサーグラフ"]
   answer: string
   correctRate: string
+  difficulty: string // 難易度: A-E
+  isImportant: string // 重要問題: ○や✓など
   imageUrl: string
   year: string
   notes: string

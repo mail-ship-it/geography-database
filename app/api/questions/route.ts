@@ -81,13 +81,15 @@ export async function GET(request: Request) {
         subTags, // パース後: ["ハイサーグラフ"]
         answer: row[3] || '', // D列: 正答
         correctRate: row[4] || '', // E列: 正答率
-        imageUrl: convertDriveUrlToDirectLink(row[7] || ''), // H列: Google Drive URL → 直接表示可能URL
+        difficulty: row[5] || '', // F列: 難易度（A-E）
+        isImportant: row[6] || '', // G列: 重要問題
+        imageUrl: convertDriveUrlToDirectLink(row[9] || ''), // J列: Google Drive URL → 直接表示可能URL
         year: year, // URLパラメータから取得
-        notes: row[6] || '', // G列: ノート
-        createdDate: row[5] || '', // F列: 作成日
-        imageFile: row[7] || '', // H列: 画像URL（新形式）
-        questionText: row[9] || '', // J列: OCRキーワード
-        fullQuestionText: row[10] || '' // K列: 問題文全文
+        notes: row[8] || '', // I列: ノート
+        createdDate: row[7] || '', // H列: 作成日
+        imageFile: row[9] || '', // J列: 画像URL（新形式）
+        questionText: row[11] || '', // L列: OCRキーワード
+        fullQuestionText: row[12] || '' // M列: 問題文全文
       }
     })
 
