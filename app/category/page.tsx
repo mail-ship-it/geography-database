@@ -81,7 +81,9 @@ function CategoryPage() {
     console.log('Questions length:', questions.length)
 
     if (selectedYearExam) {
-      filtered = filtered.filter(q => q.questionId?.includes(selectedYearExam))
+      // "2025年本試験" → "2025_本試験" に変換
+      const yearExamPattern = selectedYearExam.replace('年', '_')
+      filtered = filtered.filter(q => q.questionId?.includes(yearExamPattern))
     }
 
     if (selectedCategories.length > 0) {
