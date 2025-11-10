@@ -158,11 +158,8 @@ function CategoryPage() {
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-8">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold text-center mb-2">
-            🌏 共通テスト地理問題データベース
+            共通テスト地理問題データベース
           </h1>
-          <p className="text-center opacity-90">
-            過去5年分の問題を分野別に検索・閲覧できます
-          </p>
         </div>
       </div>
 

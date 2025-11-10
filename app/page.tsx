@@ -10,14 +10,8 @@ export default function Home() {
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            🌏 共通テスト地理問題データベース
+            共通テスト地理問題データベース
           </h1>
-          <p className="text-xl opacity-90 mb-8">
-            過去5年分の問題を効率的に学習できます
-          </p>
-          <div className="text-lg opacity-80">
-            2021年〜2025年 | 本試験・追試験対応
-          </div>
         </div>
       </div>
 
@@ -88,31 +82,6 @@ export default function Home() {
                 </div>
               </div>
             </Link>
-          </div>
-
-          {/* 統計情報 */}
-          <div className="mt-12 bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">
-              データベース概要
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-              <div>
-                <div className="text-2xl font-bold text-blue-600">5年分</div>
-                <div className="text-sm text-gray-600">対象年度</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-green-600">10回分</div>
-                <div className="text-sm text-gray-600">本試験・追試験</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-purple-600">150問+</div>
-                <div className="text-sm text-gray-600">総問題数</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-orange-600">分野別</div>
-                <div className="text-sm text-gray-600">タグ検索</div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
