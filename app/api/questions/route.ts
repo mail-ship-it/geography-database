@@ -70,26 +70,26 @@ export async function GET(request: Request) {
 
     // ヘッダー行をスキップして、データを変換
     const questions: Question[] = rows.slice(1).map((row, index) => {
-      const categoryString = row[2] || '' // C列: 分野タグ
-      const { mainTags, subTags } = parseTags(categoryString)
+      const mainTagsString = row[2] || '' // C列: メインタグ
+      const subTagsString = row[3] || '' // D列: サブタグ
 
       return {
         id: (index + 1).toString(),
         questionId: row[1] || '', // B列: 問題ID（2024_本試験_1など）
-        category: categoryString, // C列: 元の形式（気候,日本|ハイサーグラフ）
-        mainTags, // パース後: ["気候", "日本"]
-        subTags, // パース後: ["ハイサーグラフ"]
-        answer: row[3] || '', // D列: 正答
-        correctRate: row[4] || '', // E列: 正答率
+        category: mainTagsString, // C列: メインタグ
+        mainTags: mainTagsString ? mainTagsString.split(',').map(t => t.trim()) : [], // メインタグを配列に
+        subTags: subTagsString ? subTagsString.split(',').map(t => t.trim()) : [], // サブタグを配列に
+        answer: row[4] || '', // E列: 正答選択肢
+        correctRate: row[7] || '', // H列: 正答率
         difficulty: row[5] || '', // F列: 難易度（A-E）
         isImportant: row[6] || '', // G列: 重要問題
         imageUrl: convertDriveUrlToDirectLink(row[9] || ''), // J列: Google Drive URL → 直接表示可能URL
         year: year, // URLパラメータから取得
-        notes: row[8] || '', // I列: ノート
-        createdDate: row[7] || '', // H列: 作成日
+        notes: row[8] || '', // I列: 備考
+        createdDate: '', // 作成日は現在のシートにない
         imageFile: row[9] || '', // J列: 画像URL（新形式）
-        questionText: row[11] || '', // L列: OCRキーワード
-        fullQuestionText: row[12] || '' // M列: 問題文全文
+        questionText: '', // OCRキーワードは現在のシートにない
+        fullQuestionText: '' // 問題文全文は現在のシートにない
       }
     })
 
