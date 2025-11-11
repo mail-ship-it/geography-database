@@ -8,7 +8,7 @@ type Question = {
   questionId: string
   category: string
   answer: string
-  correctRate: string
+  difficulty: string
   imageUrl: string
   year: string
   questionText?: string
@@ -97,6 +97,7 @@ function CategoryPage() {
       filtered = filtered.filter(q =>
         q.questionId?.toLowerCase().includes(lower) ||
         q.category?.toLowerCase().includes(lower) ||
+        q.difficulty?.toLowerCase().includes(lower) ||
         q.questionText?.toLowerCase().includes(lower) ||
         q.fullQuestionText?.toLowerCase().includes(lower)
       )
@@ -199,7 +200,7 @@ function CategoryPage() {
                 type="text"
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
-                placeholder="問題IDや分野名で検索"
+                placeholder="問題ID、分野名、難易度（A-E）で検索"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -264,16 +265,30 @@ function CategoryPage() {
                       </div>
                     </div>
 
-                    {/* カテゴリ */}
-                    <div className="mb-3">
+                    {/* カテゴリと難易度 */}
+                    <div className="mb-3 flex flex-wrap items-center gap-2">
                       {question.category?.split(',').map((cat, index) => (
                         <span
                           key={index}
-                          className="inline-block bg-green-100 text-green-700 px-2 py-1 rounded-md text-xs mr-2 mb-1"
+                          className="inline-block bg-green-100 text-green-700 px-2 py-1 rounded-md text-xs"
                         >
                           {cat.trim()}
                         </span>
                       ))}
+                      {question.difficulty && (
+                        <span
+                          className={`inline-block px-2 py-1 rounded-md text-xs font-semibold ${
+                            question.difficulty === 'A' ? 'bg-green-200 text-green-800' :
+                            question.difficulty === 'B' ? 'bg-blue-200 text-blue-800' :
+                            question.difficulty === 'C' ? 'bg-yellow-200 text-yellow-800' :
+                            question.difficulty === 'D' ? 'bg-orange-200 text-orange-800' :
+                            question.difficulty === 'E' ? 'bg-red-200 text-red-800' :
+                            'bg-gray-200 text-gray-800'
+                          }`}
+                        >
+                          難易度: {question.difficulty}
+                        </span>
+                      )}
                     </div>
 
                     {/* 問題文 */}
