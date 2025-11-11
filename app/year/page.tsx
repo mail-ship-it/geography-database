@@ -9,6 +9,7 @@ type YearInfo = {
   examType: string
   problemPdfUrl: string
   answerPdfUrl: string
+  explanationPdfUrl: string
   averageScore: string
   notes: string
 }
@@ -134,6 +135,27 @@ export default function YearPage() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600 transition-colors text-sm"
+                              >
+                                <Download className="w-4 h-4 mr-1" />
+                                開く
+                              </a>
+                            ) : (
+                              <span className="text-gray-400 text-sm">準備中</span>
+                            )}
+                          </div>
+
+                          {/* 解説PDF */}
+                          <div className="flex items-center justify-between bg-purple-50 p-3 rounded-lg">
+                            <div className="flex items-center">
+                              <FileText className="w-5 h-5 text-purple-600 mr-2" />
+                              <span className="text-sm font-medium text-purple-700">解説PDF</span>
+                            </div>
+                            {exam.explanationPdfUrl ? (
+                              <a
+                                href={exam.explanationPdfUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center bg-purple-500 text-white px-3 py-1 rounded-md hover:bg-purple-600 transition-colors text-sm"
                               >
                                 <Download className="w-4 h-4 mr-1" />
                                 開く

@@ -6,6 +6,7 @@ export type YearInfo = {
   examType: string
   problemPdfUrl: string
   answerPdfUrl: string
+  explanationPdfUrl: string
   averageScore: string
   notes: string
 }
@@ -16,11 +17,11 @@ export async function GET() {
     
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: '年度別情報!A2:F100', // ヘッダー行を除く
+      range: '年度別情報!A2:G100', // ヘッダー行を除く（A-G列まで取得）
     })
 
     const rows = response.data.values || []
-    
+
     const yearInfoList: YearInfo[] = rows
       .filter(row => row[0]) // 年度が入力されている行のみ
       .map(row => ({
@@ -28,8 +29,9 @@ export async function GET() {
         examType: row[1] || '',
         problemPdfUrl: row[2] || '',
         answerPdfUrl: row[3] || '',
-        averageScore: row[4] || '',
-        notes: row[5] || ''
+        explanationPdfUrl: row[4] || '', // E列: 解説PDF_URL
+        averageScore: row[5] || '', // F列: 平均点
+        notes: row[6] || '' // G列: 備考
       }))
 
     return NextResponse.json(yearInfoList)
