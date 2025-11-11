@@ -21,6 +21,7 @@ function CategoryPage() {
   const [categories, setCategories] = useState<string[]>([])
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [selectedYearExam, setSelectedYearExam] = useState<string>('')
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('')
   const [searchText, setSearchText] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [showAnswers, setShowAnswers] = useState<{ [key: string]: boolean }>({})
@@ -86,6 +87,10 @@ function CategoryPage() {
       filtered = filtered.filter(q => q.questionId?.includes(yearExamPattern))
     }
 
+    if (selectedDifficulty) {
+      filtered = filtered.filter(q => q.difficulty === selectedDifficulty)
+    }
+
     if (selectedCategories.length > 0) {
       filtered = filtered.filter(q =>
         selectedCategories.every(cat => q.category?.includes(cat))
@@ -106,7 +111,7 @@ function CategoryPage() {
     console.log('Filtered questions:', filtered)
     console.log('Filtered length:', filtered.length)
     setFilteredQuestions(filtered)
-  }, [questions, selectedYearExam, selectedCategories, searchText])
+  }, [questions, selectedYearExam, selectedDifficulty, selectedCategories, searchText])
 
   useEffect(() => {
     fetchQuestions()
@@ -169,7 +174,7 @@ function CategoryPage() {
       {/* 検索パネル */}
       <div className="container mx-auto px-4 py-6">
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             {/* 年度・試験種別選択 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -190,6 +195,26 @@ function CategoryPage() {
               </select>
             </div>
 
+            {/* 難易度選択 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Tag className="inline w-4 h-4 mr-1" />
+                難易度
+              </label>
+              <select
+                value={selectedDifficulty}
+                onChange={(e) => setSelectedDifficulty(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">全て</option>
+                <option value="A">A（易）</option>
+                <option value="B">B（やや易）</option>
+                <option value="C">C（普通）</option>
+                <option value="D">D（やや難）</option>
+                <option value="E">E（難）</option>
+              </select>
+            </div>
+
             {/* キーワード検索 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -200,7 +225,7 @@ function CategoryPage() {
                 type="text"
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
-                placeholder="問題ID、分野名、難易度（A-E）で検索"
+                placeholder="問題ID、分野名で検索"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
