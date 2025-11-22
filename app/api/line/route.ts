@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import type { MessageParam, TextBlock } from '@anthropic-ai/sdk/resources/messages';
 import crypto from 'crypto';
 
 // 環境変数
@@ -13,7 +14,7 @@ const anthropic = new Anthropic({
 });
 
 // セッション管理（簡易版 - メモリベース）
-const sessions = new Map<string, { conversationId: string; messages: any[] }>();
+const sessions = new Map<string, { conversationId: string; messages: MessageParam[] }>();
 
 export async function POST(req: NextRequest) {
   try {
@@ -111,13 +112,13 @@ async function runClaudeForLine(prompt: string, userId: string): Promise<string>
 - 「なぜそう思う？」「どこに注目した？」など問いかける
 - 正解を褒め、間違いは丁寧に訂正する
 - 関連する知識も補足する`,
-      messages: session.messages as any,
+      messages: session.messages,
     });
 
     // アシスタントの応答を履歴に追加
     const responseText = message.content
-      .filter((block) => block.type === 'text')
-      .map((block: any) => block.text)
+      .filter((block): block is TextBlock => block.type === 'text')
+      .map((block) => block.text)
       .join('\n');
 
     session.messages.push({
@@ -131,9 +132,10 @@ async function runClaudeForLine(prompt: string, userId: string): Promise<string>
     }
 
     return responseText;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error calling Claude API for LINE:', error);
-    return `エラーが発生しました: ${error.message}`;
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return `エラーが発生しました: ${errorMessage}`;
   }
 }
 

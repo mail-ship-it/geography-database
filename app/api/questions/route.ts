@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getGoogleSheetsClient, SPREADSHEET_ID, SHEET_NAMES, Question, parseTags } from '@/lib/googleSheets'
+import { getGoogleSheetsClient, SPREADSHEET_ID, SHEET_NAMES, Question } from '@/lib/googleSheets'
 
 // Google Drive URL を画像表示可能な形式に変換
 function convertDriveUrlToDirectLink(driveUrl: string): string {

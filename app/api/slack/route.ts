@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import type { MessageParam, TextBlock } from '@anthropic-ai/sdk/resources/messages';
 import { WebClient } from '@slack/web-api';
 
 // 環境変数
@@ -17,7 +18,7 @@ const anthropic = new Anthropic({
 
 // セッション管理（簡易版 - メモリベース）
 // 本番環境ではVercel KVやデータベースを使用すべき
-const sessions = new Map<string, { conversationId: string; messages: any[] }>();
+const sessions = new Map<string, { conversationId: string; messages: MessageParam[] }>();
 
 export async function POST(req: NextRequest) {
   try {
@@ -97,13 +98,13 @@ async function runClaude(prompt: string, userId: string): Promise<string> {
 - コードの説明、アドバイス、デバッグ支援に特化しています
 - 簡潔で分かりやすい回答を心がけてください
 - 必要に応じてコードブロックを使用してください`,
-      messages: session.messages as any,
+      messages: session.messages,
     });
 
     // アシスタントの応答を履歴に追加
     const responseText = message.content
-      .filter((block) => block.type === 'text')
-      .map((block: any) => block.text)
+      .filter((block): block is TextBlock => block.type === 'text')
+      .map((block) => block.text)
       .join('\n');
 
     session.messages.push({
@@ -117,9 +118,10 @@ async function runClaude(prompt: string, userId: string): Promise<string> {
     }
 
     return responseText;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error calling Claude API:', error);
-    return `エラーが発生しました: ${error.message}`;
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return `エラーが発生しました: ${errorMessage}`;
   }
 }
 
