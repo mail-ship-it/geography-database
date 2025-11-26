@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getGoogleSheetsClient, SPREADSHEET_ID, SHEET_NAMES, Question } from '@/lib/googleSheets'
+import { getGoogleSheetsClient, SPREADSHEET_ID, Question } from '@/lib/googleSheets'
 
 // Google Drive URL を画像表示可能な形式に変換
 function convertDriveUrlToDirectLink(driveUrl: string): string {
@@ -30,6 +30,46 @@ function convertDriveUrlToDirectLink(driveUrl: string): string {
   return driveUrl
 }
 
+// ヘッダー名と列インデックスのマッピングを作成
+function createColumnMapping(headers: string[]): Record<string, number> {
+  const mapping: Record<string, number> = {}
+
+  // ヘッダー名のバリエーションに対応
+  const headerAliases: Record<string, string[]> = {
+    'questionId': ['問題ID', '問題id', 'ID', 'id'],
+    'mainTags': ['メインタグ', 'メイン分野', '分野', 'カテゴリ', 'category'],
+    'subTags': ['サブタグ', 'サブ分野', 'タグ'],
+    'answer': ['正答選択肢', '正答', '答え', '解答'],
+    'correctRate': ['正答率', '正解率'],
+    'difficulty': ['難易度'],
+    'isImportant': ['重要問題', '重要'],
+    'questionText': ['問題文'],
+    'explanation': ['解説文', '解説'],
+    'notes': ['備考', 'メモ', 'note'],
+    'imageUrl': ['画像URL', '画像url', '画像', 'image', 'imageUrl'],
+  }
+
+  headers.forEach((header, index) => {
+    const trimmedHeader = header.trim()
+
+    // 各フィールドに対してヘッダー名をチェック
+    for (const [fieldName, aliases] of Object.entries(headerAliases)) {
+      if (aliases.some(alias => trimmedHeader.includes(alias) || trimmedHeader === alias)) {
+        mapping[fieldName] = index
+        break
+      }
+    }
+  })
+
+  return mapping
+}
+
+// シート名を動的に生成（年度と試験種別から）
+function getSheetName(year: string, examType: string): string {
+  const examTypeJa = examType === 'honshiken' ? '本試験' : '追試験'
+  return `${year}年${examTypeJa}`
+}
+
 export async function GET(request: Request) {
   try {
     // 環境変数の存在確認
@@ -44,22 +84,15 @@ export async function GET(request: Request) {
     const year = searchParams.get('year') || '2024'
     const examType = searchParams.get('examType') || 'honshiken'
 
-    // シート名を取得
-    const sheetKey = `${year}_${examType}`
-    const sheetName = SHEET_NAMES[sheetKey]
-
-    if (!sheetName) {
-      return NextResponse.json({
-        error: `Invalid year or examType. Sheet not found for: ${sheetKey}`
-      }, { status: 400 })
-    }
+    // シート名を動的に生成
+    const sheetName = getSheetName(year, examType)
 
     const sheets = getGoogleSheetsClient()
 
-    // スプレッドシートからデータを取得
+    // スプレッドシートから全列のデータを取得
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${sheetName}!A:L`, // A列からL列まで取得（L列が画像URL）
+      range: `${sheetName}!A:Z`, // 全列を取得（将来の列追加に対応）
     })
 
     const rows = response.data.values
@@ -68,32 +101,39 @@ export async function GET(request: Request) {
       return NextResponse.json([])
     }
 
-    // ヘッダー行をスキップして、データを変換
-    // 列構造:
-    // A列(0): 通し番号, B列(1): 問題ID, C列(2): メインタグ, D列(3): サブタグ
-    // E列(4): 正答選択肢, F列(5): 正答率, G列(6): 難易度, H列(7): 重要問題
-    // I列(8): 問題文, J列(9): 解説文, K列(10): 備考, L列(11): 画像URL
+    // ヘッダー行から列マッピングを作成
+    const headers = rows[0] as string[]
+    const columnMap = createColumnMapping(headers)
+
+    // データ行を変換
     const questions: Question[] = rows.slice(1).map((row, index) => {
-      const mainTagsString = row[2] || '' // C列: メインタグ
-      const subTagsString = row[3] || '' // D列: サブタグ
+      const getValue = (fieldName: string): string => {
+        const colIndex = columnMap[fieldName]
+        return colIndex !== undefined ? (row[colIndex] || '') : ''
+      }
+
+      const mainTagsString = getValue('mainTags')
+      const subTagsString = getValue('subTags')
+      const imageUrlRaw = getValue('imageUrl')
 
       return {
         id: (index + 1).toString(),
-        questionId: row[1] || '', // B列: 問題ID（2024_本試験_1など）
-        category: mainTagsString, // C列: メインタグ
-        mainTags: mainTagsString ? mainTagsString.split(',').map((t: string) => t.trim()) : [], // メインタグを配列に
-        subTags: subTagsString ? subTagsString.split(',').map((t: string) => t.trim()) : [], // サブタグを配列に
-        answer: row[4] || '', // E列: 正答選択肢
-        correctRate: row[5] || '', // F列: 正答率
-        difficulty: row[6] || '', // G列: 難易度（A-E）
-        isImportant: row[7] || '', // H列: 重要問題
-        imageUrl: convertDriveUrlToDirectLink(row[11] || ''), // L列: Google Drive URL → 直接表示可能URL
-        year: year, // URLパラメータから取得
-        notes: row[10] || '', // K列: 備考
-        createdDate: '', // 作成日は現在のシートにない
-        imageFile: row[11] || '', // L列: 画像URL（元URL）
-        questionText: row[8] || '', // I列: 問題文
-        fullQuestionText: row[8] || '' // I列: 問題文
+        questionId: getValue('questionId'),
+        category: mainTagsString,
+        mainTags: mainTagsString ? mainTagsString.split(',').map((t: string) => t.trim()) : [],
+        subTags: subTagsString ? subTagsString.split(',').map((t: string) => t.trim()) : [],
+        answer: getValue('answer'),
+        correctRate: getValue('correctRate'),
+        difficulty: getValue('difficulty'),
+        isImportant: getValue('isImportant'),
+        imageUrl: convertDriveUrlToDirectLink(imageUrlRaw),
+        year: year,
+        notes: getValue('notes'),
+        createdDate: '',
+        imageFile: imageUrlRaw,
+        questionText: getValue('questionText'),
+        fullQuestionText: getValue('questionText'),
+        explanation: getValue('explanation'),
       }
     })
 

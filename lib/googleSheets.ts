@@ -51,6 +51,7 @@ export type Question = {
   imageFile: string
   questionText: string
   fullQuestionText: string
+  explanation?: string // 解説文
 }
 
 // タグをパースする関数
