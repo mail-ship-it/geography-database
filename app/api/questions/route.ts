@@ -34,27 +34,27 @@ function convertDriveUrlToDirectLink(driveUrl: string): string {
 function createColumnMapping(headers: string[]): Record<string, number> {
   const mapping: Record<string, number> = {}
 
-  // ヘッダー名のバリエーションに対応
+  // ヘッダー名のバリエーションに対応（完全一致を優先するため、長い順にソート）
   const headerAliases: Record<string, string[]> = {
-    'questionId': ['問題ID', '問題id', 'ID', 'id'],
-    'mainTags': ['メインタグ', 'メイン分野', '分野', 'カテゴリ', 'category'],
-    'subTags': ['サブタグ', 'サブ分野', 'タグ'],
-    'answer': ['正答選択肢', '正答', '答え', '解答'],
+    'questionId': ['問題ID', '問題id'],
+    'mainTags': ['メインタグ', 'メイン分野'],
+    'subTags': ['サブタグ', 'サブ分野'],
+    'answer': ['正答選択肢'],
     'correctRate': ['正答率', '正解率'],
     'difficulty': ['難易度'],
-    'isImportant': ['重要問題', '重要'],
+    'isImportant': ['重要問題'],
     'questionText': ['問題文'],
-    'explanation': ['解説文', '解説'],
-    'notes': ['備考', 'メモ', 'note'],
-    'imageUrl': ['画像URL', '画像url', '画像', 'image', 'imageUrl'],
+    'explanation': ['解説文'],
+    'notes': ['備考'],
+    'imageUrl': ['画像URL', '画像url'],
   }
 
   headers.forEach((header, index) => {
     const trimmedHeader = header.trim()
 
-    // 各フィールドに対してヘッダー名をチェック
+    // 各フィールドに対してヘッダー名をチェック（完全一致のみ）
     for (const [fieldName, aliases] of Object.entries(headerAliases)) {
-      if (aliases.some(alias => trimmedHeader.includes(alias) || trimmedHeader === alias)) {
+      if (aliases.some(alias => trimmedHeader === alias)) {
         mapping[fieldName] = index
         break
       }
