@@ -59,7 +59,7 @@ export async function GET(request: Request) {
     // スプレッドシートからデータを取得
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${sheetName}!A:K`, // A列からK列まで取得
+      range: `${sheetName}!A:L`, // A列からL列まで取得（L列が画像URL）
     })
 
     const rows = response.data.values
@@ -69,6 +69,10 @@ export async function GET(request: Request) {
     }
 
     // ヘッダー行をスキップして、データを変換
+    // 列構造:
+    // A列(0): 通し番号, B列(1): 問題ID, C列(2): メインタグ, D列(3): サブタグ
+    // E列(4): 正答選択肢, F列(5): 正答率, G列(6): 難易度, H列(7): 重要問題
+    // I列(8): 問題文, J列(9): 解説文, K列(10): 備考, L列(11): 画像URL
     const questions: Question[] = rows.slice(1).map((row, index) => {
       const mainTagsString = row[2] || '' // C列: メインタグ
       const subTagsString = row[3] || '' // D列: サブタグ
@@ -83,13 +87,13 @@ export async function GET(request: Request) {
         correctRate: row[5] || '', // F列: 正答率
         difficulty: row[6] || '', // G列: 難易度（A-E）
         isImportant: row[7] || '', // H列: 重要問題
-        imageUrl: convertDriveUrlToDirectLink(row[9] || ''), // J列: Google Drive URL → 直接表示可能URL
+        imageUrl: convertDriveUrlToDirectLink(row[11] || ''), // L列: Google Drive URL → 直接表示可能URL
         year: year, // URLパラメータから取得
-        notes: row[8] || '', // I列: 備考
+        notes: row[10] || '', // K列: 備考
         createdDate: '', // 作成日は現在のシートにない
-        imageFile: row[9] || '', // J列: 画像URL（新形式）
-        questionText: '', // OCRキーワードは現在のシートにない
-        fullQuestionText: '' // 問題文全文は現在のシートにない
+        imageFile: row[11] || '', // L列: 画像URL（元URL）
+        questionText: row[8] || '', // I列: 問題文
+        fullQuestionText: row[8] || '' // I列: 問題文
       }
     })
 
