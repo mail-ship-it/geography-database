@@ -13,6 +13,7 @@ type Question = {
   year: string
   questionText?: string
   fullQuestionText?: string
+  explanation?: string
 }
 
 function CategoryPage() {
@@ -355,13 +356,21 @@ function CategoryPage() {
                         onClick={() => toggleAnswer(question.id)}
                         className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors text-sm"
                       >
-                        {showAnswers[question.id] ? '正答を隠す' : '正答を表示'}
+                        {showAnswers[question.id] ? '正答・解説を隠す' : '正答・解説を表示'}
                       </button>
                       {showAnswers[question.id] && (
-                        <div className="mt-3 p-3 bg-orange-50 rounded-lg">
-                          <div className="text-lg font-bold text-orange-700">
-                            正答: {question.answer || '未設定'}
+                        <div className="mt-3 space-y-3">
+                          <div className="p-3 bg-orange-50 rounded-lg">
+                            <div className="text-lg font-bold text-orange-700">
+                              正答: {question.answer || '未設定'}
+                            </div>
                           </div>
+                          {question.explanation && (
+                            <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
+                              <h4 className="text-sm font-semibold text-green-700 mb-2">解説</h4>
+                              <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{question.explanation}</p>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
