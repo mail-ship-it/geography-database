@@ -303,7 +303,14 @@ function CategoryPage() {
                       ))}
                       {question.difficulty && (
                         <span
-                          className="inline-block px-2 py-1 rounded-md text-xs font-semibold bg-[#e2e2e2] text-gray-700"
+                          className={`inline-block px-2 py-1 rounded-md text-xs font-semibold ${
+                            question.difficulty === 'A' ? 'bg-[#3ab5cd] text-white' :
+                            question.difficulty === 'B' ? 'bg-[#2b6ca3] text-white' :
+                            question.difficulty === 'C' ? 'bg-[#feec00] text-gray-800' :
+                            question.difficulty === 'D' ? 'bg-[#e63278] text-white' :
+                            question.difficulty === 'E' ? 'bg-[#e63035] text-white' :
+                            'bg-[#e2e2e2] text-gray-700'
+                          }`}
                         >
                           難易度: {question.difficulty}
                         </span>
