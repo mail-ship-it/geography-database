@@ -5,9 +5,9 @@ import { Calendar, Search, FileText, BarChart3 } from 'lucide-react'
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-white">
       {/* ヘッダー */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16">
+      <div className="bg-[#3ab5cd] text-white py-16">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             共通テスト地理問題データベース
@@ -18,19 +18,19 @@ export default function Home() {
       {/* メイン選択画面 */}
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">
+          <h2 className="text-2xl font-bold text-center text-[#2b6ca3] mb-8">
             表示方式を選択してください
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* 年度ごとに表示 */}
             <Link href="/year">
-              <div className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer group">
+              <div className="bg-white border border-[#e2e2e2] rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer group">
                 <div className="p-8 text-center">
-                  <div className="bg-blue-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-200 transition-colors">
-                    <Calendar className="w-10 h-10 text-blue-600" />
+                  <div className="bg-[#3ab5cd]/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:bg-[#3ab5cd]/20 transition-colors">
+                    <Calendar className="w-10 h-10 text-[#3ab5cd]" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                  <h3 className="text-2xl font-bold text-[#2b6ca3] mb-4">
                     年度ごとに表示
                   </h3>
                   <p className="text-gray-600 mb-6 leading-relaxed">
@@ -47,7 +47,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                <div className="bg-blue-600 text-white py-4 rounded-b-lg text-center font-medium group-hover:bg-blue-700 transition-colors">
+                <div className="bg-[#3ab5cd] text-white py-4 rounded-b-lg text-center font-medium group-hover:bg-[#2b6ca3] transition-colors">
                   年度別表示を開く →
                 </div>
               </div>
@@ -55,12 +55,12 @@ export default function Home() {
 
             {/* 分野ごとに表示 */}
             <Link href="/category">
-              <div className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer group">
+              <div className="bg-white border border-[#e2e2e2] rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer group">
                 <div className="p-8 text-center">
-                  <div className="bg-green-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:bg-green-200 transition-colors">
-                    <Search className="w-10 h-10 text-green-600" />
+                  <div className="bg-[#3ab5cd]/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:bg-[#3ab5cd]/20 transition-colors">
+                    <Search className="w-10 h-10 text-[#3ab5cd]" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                  <h3 className="text-2xl font-bold text-[#2b6ca3] mb-4">
                     分野ごとに表示
                   </h3>
                   <p className="text-gray-600 mb-6 leading-relaxed">
@@ -77,7 +77,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                <div className="bg-green-600 text-white py-4 rounded-b-lg text-center font-medium group-hover:bg-green-700 transition-colors">
+                <div className="bg-[#3ab5cd] text-white py-4 rounded-b-lg text-center font-medium group-hover:bg-[#2b6ca3] transition-colors">
                   分野別検索を開く →
                 </div>
               </div>

@@ -162,9 +162,9 @@ function CategoryPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-white">
       {/* ヘッダー */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-8">
+      <div className="bg-[#3ab5cd] text-white py-8">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold text-center mb-2">
             共通テスト地理問題データベース
@@ -174,7 +174,7 @@ function CategoryPage() {
 
       {/* 検索パネル */}
       <div className="container mx-auto px-4 py-6">
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white border border-[#e2e2e2] rounded-lg shadow-sm p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             {/* 年度・試験種別選択 */}
             <div>
@@ -185,7 +185,7 @@ function CategoryPage() {
               <select
                 value={selectedYearExam}
                 onChange={(e) => setSelectedYearExam(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-[#e2e2e2] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3ab5cd]"
               >
                 <option value="">全て</option>
                 {availableYearExams.map(yearExam => (
@@ -205,7 +205,7 @@ function CategoryPage() {
               <select
                 value={selectedDifficulty}
                 onChange={(e) => setSelectedDifficulty(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-[#e2e2e2] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3ab5cd]"
               >
                 <option value="">全て</option>
                 <option value="A">A（易）</option>
@@ -227,7 +227,7 @@ function CategoryPage() {
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 placeholder="問題ID、分野名で検索"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-[#e2e2e2] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3ab5cd]"
               />
             </div>
 
@@ -255,8 +255,8 @@ function CategoryPage() {
                   onClick={() => toggleCategory(category)}
                   className={`px-3 py-1 rounded-full text-sm transition-colors ${
                     selectedCategories.includes(category)
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                      ? 'bg-[#3ab5cd] text-white'
+                      : 'bg-[#3ab5cd]/10 text-[#2b6ca3] hover:bg-[#3ab5cd]/20'
                   }`}
                 >
                   {category}
@@ -267,10 +267,10 @@ function CategoryPage() {
         </div>
 
         {/* 結果表示 */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="bg-white border border-[#e2e2e2] rounded-lg shadow-sm overflow-hidden">
           {loading ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3ab5cd] mx-auto"></div>
               <p className="mt-4 text-gray-600">データを読み込み中...</p>
             </div>
           ) : filteredQuestions.length === 0 ? (
@@ -285,7 +285,7 @@ function CategoryPage() {
                     {/* 問題ヘッダー */}
                     <div className="flex justify-between items-center mb-3">
                       <div className="flex items-center gap-3">
-                        <span className="font-bold text-blue-600">
+                        <span className="font-bold text-[#2b6ca3]">
                           {question.questionId || 'ID不明'}
                         </span>
                       </div>
@@ -296,21 +296,14 @@ function CategoryPage() {
                       {question.category?.split(',').map((cat, index) => (
                         <span
                           key={index}
-                          className="inline-block bg-green-100 text-green-700 px-2 py-1 rounded-md text-xs"
+                          className="inline-block bg-[#3ab5cd]/10 text-[#2b6ca3] px-2 py-1 rounded-md text-xs"
                         >
                           {cat.trim()}
                         </span>
                       ))}
                       {question.difficulty && (
                         <span
-                          className={`inline-block px-2 py-1 rounded-md text-xs font-semibold ${
-                            question.difficulty === 'A' ? 'bg-green-200 text-green-800' :
-                            question.difficulty === 'B' ? 'bg-blue-200 text-blue-800' :
-                            question.difficulty === 'C' ? 'bg-yellow-200 text-yellow-800' :
-                            question.difficulty === 'D' ? 'bg-orange-200 text-orange-800' :
-                            question.difficulty === 'E' ? 'bg-red-200 text-red-800' :
-                            'bg-gray-200 text-gray-800'
-                          }`}
+                          className="inline-block px-2 py-1 rounded-md text-xs font-semibold bg-[#e2e2e2] text-gray-700"
                         >
                           難易度: {question.difficulty}
                         </span>
@@ -319,8 +312,8 @@ function CategoryPage() {
 
                     {/* 問題文 */}
                     {question.fullQuestionText && (
-                      <div className="mb-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-                        <h3 className="text-sm font-semibold text-blue-700 mb-2">問題文</h3>
+                      <div className="mb-4 p-4 bg-[#3ab5cd]/5 rounded-lg border-l-4 border-[#3ab5cd]">
+                        <h3 className="text-sm font-semibold text-[#2b6ca3] mb-2">問題文</h3>
                         <p className="text-gray-800 leading-relaxed">{question.fullQuestionText}</p>
                       </div>
                     )}
@@ -332,8 +325,8 @@ function CategoryPage() {
                           onClick={() => toggleImage(question.id)}
                           className={`px-4 py-2 rounded-md transition-colors text-sm ${
                             isImageVisible(question.id)
-                              ? 'bg-red-500 text-white hover:bg-red-600'
-                              : 'bg-blue-500 text-white hover:bg-blue-600'
+                              ? 'bg-[#e2e2e2] text-gray-700 hover:bg-gray-300'
+                              : 'bg-[#3ab5cd] text-white hover:bg-[#2b6ca3]'
                           }`}
                         >
                           {isImageVisible(question.id) ? '問題を非表示' : '問題を表示'}
@@ -354,20 +347,20 @@ function CategoryPage() {
                     <div>
                       <button
                         onClick={() => toggleAnswer(question.id)}
-                        className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors text-sm"
+                        className="bg-[#2b6ca3] text-white px-4 py-2 rounded-md hover:bg-[#3ab5cd] transition-colors text-sm"
                       >
                         {showAnswers[question.id] ? '正答・解説を隠す' : '正答・解説を表示'}
                       </button>
                       {showAnswers[question.id] && (
                         <div className="mt-3 space-y-3">
-                          <div className="p-3 bg-orange-50 rounded-lg">
-                            <div className="text-lg font-bold text-orange-700">
+                          <div className="p-3 bg-[#feec00]/20 rounded-lg">
+                            <div className="text-lg font-bold text-[#2b6ca3]">
                               正答: {question.answer || '未設定'}
                             </div>
                           </div>
                           {question.explanation && (
-                            <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
-                              <h4 className="text-sm font-semibold text-green-700 mb-2">解説</h4>
+                            <div className="p-4 bg-[#3ab5cd]/5 rounded-lg border-l-4 border-[#3ab5cd]">
+                              <h4 className="text-sm font-semibold text-[#2b6ca3] mb-2">解説</h4>
                               <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{question.explanation}</p>
                             </div>
                           )}
@@ -383,7 +376,7 @@ function CategoryPage() {
                 <div className="text-center py-6">
                   <button
                     onClick={loadMore}
-                    className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                    className="bg-[#3ab5cd] text-white px-6 py-3 rounded-lg hover:bg-[#2b6ca3] transition-colors font-medium"
                   >
                     さらに読み込む ({displayCount}/{filteredQuestions.length}問表示中)
                   </button>

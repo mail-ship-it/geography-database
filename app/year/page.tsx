@@ -45,20 +45,20 @@ export default function YearPage() {
   const years = Object.keys(groupedData).sort((a, b) => parseInt(b) - parseInt(a))
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-white">
       {/* ヘッダー */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-8">
+      <div className="bg-[#3ab5cd] text-white py-8">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold text-center mb-2">
-            🌏 共通テスト地理問題データベース
+            共通テスト地理問題データベース
           </h1>
           <p className="text-center opacity-90">
             年度別 - 問題・解答PDFと平均点
           </p>
           <div className="text-center mt-4">
-            <Link 
+            <Link
               href="/"
-              className="text-white hover:text-blue-200 transition-colors"
+              className="text-white hover:text-white/80 transition-colors"
             >
               ← トップページに戻る
             </Link>
@@ -69,14 +69,14 @@ export default function YearPage() {
       <div className="container mx-auto px-4 py-6">
         {loading ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3ab5cd] mx-auto"></div>
             <p className="mt-4 text-gray-600">データを読み込み中...</p>
           </div>
         ) : (
           <div className="space-y-6">
             {years.map(year => (
-              <div key={year} className="bg-white rounded-lg shadow-md overflow-hidden">
-                <div className="bg-blue-600 text-white px-6 py-4">
+              <div key={year} className="bg-white border border-[#e2e2e2] rounded-lg shadow-sm overflow-hidden">
+                <div className="bg-[#2b6ca3] text-white px-6 py-4">
                   <h2 className="text-2xl font-bold flex items-center">
                     <Calendar className="mr-2" />
                     {year}年 共通テスト地理B
@@ -86,13 +86,13 @@ export default function YearPage() {
                 <div className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {groupedData[year].map((exam, index) => (
-                      <div key={index} className="border border-gray-200 rounded-lg p-4">
+                      <div key={index} className="border border-[#e2e2e2] rounded-lg p-4">
                         <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-lg font-semibold text-gray-800">
+                          <h3 className="text-lg font-semibold text-[#2b6ca3]">
                             {exam.examType}
                           </h3>
                           {exam.averageScore && (
-                            <div className="flex items-center text-orange-600">
+                            <div className="flex items-center text-[#2b6ca3]">
                               <BarChart3 className="w-4 h-4 mr-1" />
                               <span className="text-sm font-medium">
                                 平均点: {exam.averageScore}点
@@ -103,17 +103,17 @@ export default function YearPage() {
                         
                         <div className="space-y-3">
                           {/* 問題PDF */}
-                          <div className="flex items-center justify-between bg-blue-50 p-3 rounded-lg">
+                          <div className="flex items-center justify-between bg-[#3ab5cd]/10 p-3 rounded-lg">
                             <div className="flex items-center">
-                              <FileText className="w-5 h-5 text-blue-600 mr-2" />
-                              <span className="text-sm font-medium text-blue-700">問題PDF</span>
+                              <FileText className="w-5 h-5 text-[#3ab5cd] mr-2" />
+                              <span className="text-sm font-medium text-[#2b6ca3]">問題PDF</span>
                             </div>
                             {exam.problemPdfUrl ? (
                               <a
                                 href={exam.problemPdfUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition-colors text-sm"
+                                className="flex items-center bg-[#3ab5cd] text-white px-3 py-1 rounded-md hover:bg-[#2b6ca3] transition-colors text-sm"
                               >
                                 <Download className="w-4 h-4 mr-1" />
                                 開く
@@ -124,17 +124,17 @@ export default function YearPage() {
                           </div>
 
                           {/* 解答PDF */}
-                          <div className="flex items-center justify-between bg-green-50 p-3 rounded-lg">
+                          <div className="flex items-center justify-between bg-[#3ab5cd]/10 p-3 rounded-lg">
                             <div className="flex items-center">
-                              <FileText className="w-5 h-5 text-green-600 mr-2" />
-                              <span className="text-sm font-medium text-green-700">解答PDF</span>
+                              <FileText className="w-5 h-5 text-[#3ab5cd] mr-2" />
+                              <span className="text-sm font-medium text-[#2b6ca3]">解答PDF</span>
                             </div>
                             {exam.answerPdfUrl ? (
                               <a
                                 href={exam.answerPdfUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600 transition-colors text-sm"
+                                className="flex items-center bg-[#3ab5cd] text-white px-3 py-1 rounded-md hover:bg-[#2b6ca3] transition-colors text-sm"
                               >
                                 <Download className="w-4 h-4 mr-1" />
                                 開く
@@ -145,17 +145,17 @@ export default function YearPage() {
                           </div>
 
                           {/* 解説PDF */}
-                          <div className="flex items-center justify-between bg-purple-50 p-3 rounded-lg">
+                          <div className="flex items-center justify-between bg-[#3ab5cd]/10 p-3 rounded-lg">
                             <div className="flex items-center">
-                              <FileText className="w-5 h-5 text-purple-600 mr-2" />
-                              <span className="text-sm font-medium text-purple-700">解説PDF</span>
+                              <FileText className="w-5 h-5 text-[#3ab5cd] mr-2" />
+                              <span className="text-sm font-medium text-[#2b6ca3]">解説PDF</span>
                             </div>
                             {exam.explanationPdfUrl ? (
                               <a
                                 href={exam.explanationPdfUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center bg-purple-500 text-white px-3 py-1 rounded-md hover:bg-purple-600 transition-colors text-sm"
+                                className="flex items-center bg-[#3ab5cd] text-white px-3 py-1 rounded-md hover:bg-[#2b6ca3] transition-colors text-sm"
                               >
                                 <Download className="w-4 h-4 mr-1" />
                                 開く
