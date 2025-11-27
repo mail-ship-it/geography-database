@@ -26,14 +26,14 @@ export default function Home() {
             {/* 年度ごとに表示 */}
             <Link href="/year" className="h-full">
               <div className="bg-white border border-[#e2e2e2] rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer group h-full flex flex-col">
-                <div className="p-8 text-center flex-1">
+                <div className="p-8 text-center flex-1 flex flex-col">
                   <div className="bg-[#3ab5cd]/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:bg-[#3ab5cd]/20 transition-colors">
                     <Calendar className="w-10 h-10 text-[#3ab5cd]" />
                   </div>
                   <h3 className="text-2xl font-bold text-[#2b6ca3] mb-4">
                     年度ごとに表示
                   </h3>
-                  <p className="text-gray-600 mb-6 leading-relaxed">
+                  <p className="text-gray-600 mb-6 leading-relaxed flex-1">
                     各年度の本試験・追試験の問題PDF、解答PDF、平均点を一覧で確認できます
                   </p>
                   <div className="space-y-2 text-sm text-gray-500">
@@ -56,14 +56,14 @@ export default function Home() {
             {/* 分野ごとに表示 */}
             <Link href="/category" className="h-full">
               <div className="bg-white border border-[#e2e2e2] rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer group h-full flex flex-col">
-                <div className="p-8 text-center flex-1">
+                <div className="p-8 text-center flex-1 flex flex-col">
                   <div className="bg-[#3ab5cd]/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:bg-[#3ab5cd]/20 transition-colors">
                     <Search className="w-10 h-10 text-[#3ab5cd]" />
                   </div>
                   <h3 className="text-2xl font-bold text-[#2b6ca3] mb-4">
                     分野ごとに表示
                   </h3>
-                  <p className="text-gray-600 mb-6 leading-relaxed">
+                  <p className="text-gray-600 mb-6 leading-relaxed flex-1">
                     分野タグや年度で絞り込んで、個別の問題を詳細に確認・検索できます
                   </p>
                   <div className="space-y-2 text-sm text-gray-500">
