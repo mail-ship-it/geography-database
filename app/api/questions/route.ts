@@ -45,7 +45,7 @@ function createColumnMapping(headers: string[]): Record<string, number> {
     'isImportant': ['重要問題'],
     'questionText': ['問題文'],
     'explanation': ['解説文'],
-    'explanationSummary': ['解説要約文'],
+    'explanationSummary': ['要約解説文'],
     'notes': ['備考'],
     'imageUrl': ['画像URL', '画像url'],
   }
