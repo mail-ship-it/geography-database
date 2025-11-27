@@ -17,6 +17,12 @@ type Question = {
   explanation?: string
 }
 
+type YearExam = {
+  year: string
+  examType: string
+  displayName: string
+}
+
 function CategoryPage() {
   const [questions, setQuestions] = useState<Question[]>([])
   const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([])
@@ -25,69 +31,73 @@ function CategoryPage() {
   const [selectedYearExam, setSelectedYearExam] = useState<string>('')
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('')
   const [searchText, setSearchText] = useState<string>('')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(true)
   const [showAnswers, setShowAnswers] = useState<{ [key: string]: boolean }>({})
   const [showImages, setShowImages] = useState<{ [key: string]: boolean }>({})
   const [displayCount, setDisplayCount] = useState(5)
-  const [availableYearExams, setAvailableYearExams] = useState<string[]>([])
+  const [availableYearExams, setAvailableYearExams] = useState<YearExam[]>([])
 
-  const fetchQuestions = async () => {
-    try {
-      // 1. まずシート情報を取得
-      const sheetInfoResponse = await fetch('/api/sheet-info')
-      const sheetInfoData = await sheetInfoResponse.json()
-
-      if (sheetInfoData.yearExams && Array.isArray(sheetInfoData.yearExams)) {
-        // 年度・試験種別リストを設定
-        const yearExamOptions = sheetInfoData.yearExams.map(
-          (item: { displayName: string }) => item.displayName
-        )
-        setAvailableYearExams(yearExamOptions)
-
-        // 2. 各シートからデータを取得
-        const allQuestions: Question[] = []
-
-        for (const item of sheetInfoData.yearExams) {
-          const examType = item.examType === '本試験' ? 'honshiken' : 'tsuishiken'
-          const response = await fetch(`/api/questions?year=${item.year}&examType=${examType}`)
-          const data = await response.json()
-
-          if (Array.isArray(data) && data.length > 0) {
-            allQuestions.push(...data)
-          }
+  // 初期読み込み: 年度リストのみ取得
+  useEffect(() => {
+    const fetchYearExams = async () => {
+      try {
+        const response = await fetch('/api/sheet-info')
+        const data = await response.json()
+        if (data.yearExams && Array.isArray(data.yearExams)) {
+          setAvailableYearExams(data.yearExams)
         }
+        setInitialLoading(false)
+      } catch (error) {
+        console.error('Error fetching year exams:', error)
+        setInitialLoading(false)
+      }
+    }
+    fetchYearExams()
+  }, [])
 
-        console.log('API Response:', allQuestions)
-        console.log('Data length:', allQuestions.length)
-        setQuestions(allQuestions)
+  // 年度選択時にデータを取得
+  const fetchQuestionsForYear = useCallback(async (yearExam: YearExam) => {
+    setLoading(true)
+    try {
+      const examType = yearExam.examType === '本試験' ? 'honshiken' : 'tsuishiken'
+      const response = await fetch(`/api/questions?year=${yearExam.year}&examType=${examType}`)
+      const data = await response.json()
+
+      if (Array.isArray(data)) {
+        setQuestions(data)
 
         // カテゴリを抽出
         const allCategories = new Set<string>()
-        allQuestions.forEach((q: Question) => {
+        data.forEach((q: Question) => {
           if (q.category) {
             q.category.split(',').forEach(cat => allCategories.add(cat.trim()))
           }
         })
         setCategories(Array.from(allCategories).sort())
       }
-
-      setLoading(false)
     } catch (error) {
       console.error('Error fetching questions:', error)
-      setLoading(false)
     }
-  }
+    setLoading(false)
+  }, [])
+
+  // 年度が変更されたらデータを取得
+  useEffect(() => {
+    if (selectedYearExam) {
+      const yearExam = availableYearExams.find(y => y.displayName === selectedYearExam)
+      if (yearExam) {
+        fetchQuestionsForYear(yearExam)
+      }
+    } else {
+      // 年度未選択時はクリア
+      setQuestions([])
+      setCategories([])
+    }
+  }, [selectedYearExam, availableYearExams, fetchQuestionsForYear])
 
   const filterQuestions = useCallback(() => {
     let filtered = questions
-    console.log('Filtering with questions:', questions)
-    console.log('Questions length:', questions.length)
-
-    if (selectedYearExam) {
-      // "2025年本試験" → "2025_本試験" に変換
-      const yearExamPattern = selectedYearExam.replace('年', '_')
-      filtered = filtered.filter(q => q.questionId?.includes(yearExamPattern))
-    }
 
     if (selectedDifficulty) {
       filtered = filtered.filter(q => q.difficulty === selectedDifficulty)
@@ -110,18 +120,12 @@ function CategoryPage() {
       )
     }
 
-    console.log('Filtered questions:', filtered)
-    console.log('Filtered length:', filtered.length)
     setFilteredQuestions(filtered)
-  }, [questions, selectedYearExam, selectedDifficulty, selectedCategories, searchText])
-
-  useEffect(() => {
-    fetchQuestions()
-  }, [])
+  }, [questions, selectedDifficulty, selectedCategories, searchText])
 
   useEffect(() => {
     filterQuestions()
-    setDisplayCount(5) // フィルタ変更時に表示数をリセット
+    setDisplayCount(5)
   }, [filterQuestions])
 
 
@@ -148,7 +152,6 @@ function CategoryPage() {
   }
 
   const isImageVisible = (questionId: string) => {
-    // デフォルトで表示（showImages[questionId]がfalseの時のみ非表示）
     return showImages[questionId] !== false
   }
 
@@ -156,8 +159,6 @@ function CategoryPage() {
     setDisplayCount(prev => prev + 5)
   }
 
-
-  // APIですでに変換済みのため、URLをそのまま使用
   const convertImageUrl = (url: string) => {
     return url
   }
@@ -174,17 +175,17 @@ function CategoryPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Calendar className="inline w-4 h-4 mr-1" />
-                年度・試験種別
+                年度・試験種別（必須）
               </label>
               <select
                 value={selectedYearExam}
                 onChange={(e) => setSelectedYearExam(e.target.value)}
                 className="w-full px-3 py-2 border border-[#e2e2e2] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3ab5cd]"
               >
-                <option value="">全て</option>
+                <option value="">年度を選択してください</option>
                 {availableYearExams.map(yearExam => (
-                  <option key={yearExam} value={yearExam}>
-                    {yearExam}
+                  <option key={yearExam.displayName} value={yearExam.displayName}>
+                    {yearExam.displayName}
                   </option>
                 ))}
               </select>
@@ -200,6 +201,7 @@ function CategoryPage() {
                 value={selectedDifficulty}
                 onChange={(e) => setSelectedDifficulty(e.target.value)}
                 className="w-full px-3 py-2 border border-[#e2e2e2] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3ab5cd]"
+                disabled={!selectedYearExam}
               >
                 <option value="">全て</option>
                 <option value="A">A（易）</option>
@@ -222,6 +224,7 @@ function CategoryPage() {
                 onChange={(e) => setSearchText(e.target.value)}
                 placeholder="問題ID、分野名で検索"
                 className="w-full px-3 py-2 border border-[#e2e2e2] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3ab5cd]"
+                disabled={!selectedYearExam}
               />
             </div>
 
@@ -229,7 +232,7 @@ function CategoryPage() {
             <div className="flex items-end">
               <div className="bg-gray-100 px-4 py-2 rounded-md w-full text-center">
                 <span className="text-lg font-semibold">
-                  {loading ? '読み込み中...' : `${filteredQuestions.length}件`}
+                  {loading ? '読み込み中...' : selectedYearExam ? `${filteredQuestions.length}件` : '-'}
                 </span>
                 <span className="text-sm text-gray-600 ml-1">の問題</span>
               </div>
@@ -237,32 +240,44 @@ function CategoryPage() {
           </div>
 
           {/* カテゴリタグ */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Tag className="inline w-4 h-4 mr-1" />
-              分野タグ（複数選択可）
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {categories.map(category => (
-                <button
-                  key={category}
-                  onClick={() => toggleCategory(category)}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                    selectedCategories.includes(category)
-                      ? 'bg-[#3ab5cd] text-white'
-                      : 'bg-[#3ab5cd]/10 text-[#2b6ca3] hover:bg-[#3ab5cd]/20'
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
+          {categories.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Tag className="inline w-4 h-4 mr-1" />
+                分野タグ（複数選択可）
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {categories.map(category => (
+                  <button
+                    key={category}
+                    onClick={() => toggleCategory(category)}
+                    className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                      selectedCategories.includes(category)
+                        ? 'bg-[#3ab5cd] text-white'
+                        : 'bg-[#3ab5cd]/10 text-[#2b6ca3] hover:bg-[#3ab5cd]/20'
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* 結果表示 */}
         <div className="bg-white border border-[#e2e2e2] rounded-lg shadow-sm overflow-hidden">
-          {loading ? (
+          {initialLoading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3ab5cd] mx-auto"></div>
+              <p className="mt-4 text-gray-600">読み込み中...</p>
+            </div>
+          ) : !selectedYearExam ? (
+            <div className="text-center py-12">
+              <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-600">年度を選択すると問題が表示されます</p>
+            </div>
+          ) : loading ? (
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3ab5cd] mx-auto"></div>
               <p className="mt-4 text-gray-600">データを読み込み中...</p>
@@ -338,6 +353,7 @@ function CategoryPage() {
                               src={convertImageUrl(question.imageUrl)}
                               alt={`問題 ${question.questionId}`}
                               className="max-w-full rounded-lg shadow-sm"
+                              loading="lazy"
                             />
                           </div>
                         )}
@@ -371,7 +387,7 @@ function CategoryPage() {
                   </div>
                 ))}
               </div>
-              
+
               {/* さらに読み込むボタン */}
               {displayCount < filteredQuestions.length && (
                 <div className="text-center py-6">
