@@ -24,9 +24,9 @@ export default function Home() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* 年度ごとに表示 */}
-            <Link href="/year">
-              <div className="bg-white border border-[#e2e2e2] rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer group">
-                <div className="p-8 text-center">
+            <Link href="/year" className="h-full">
+              <div className="bg-white border border-[#e2e2e2] rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer group h-full flex flex-col">
+                <div className="p-8 text-center flex-1">
                   <div className="bg-[#3ab5cd]/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:bg-[#3ab5cd]/20 transition-colors">
                     <Calendar className="w-10 h-10 text-[#3ab5cd]" />
                   </div>
@@ -54,9 +54,9 @@ export default function Home() {
             </Link>
 
             {/* 分野ごとに表示 */}
-            <Link href="/category">
-              <div className="bg-white border border-[#e2e2e2] rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer group">
-                <div className="p-8 text-center">
+            <Link href="/category" className="h-full">
+              <div className="bg-white border border-[#e2e2e2] rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer group h-full flex flex-col">
+                <div className="p-8 text-center flex-1">
                   <div className="bg-[#3ab5cd]/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:bg-[#3ab5cd]/20 transition-colors">
                     <Search className="w-10 h-10 text-[#3ab5cd]" />
                   </div>
