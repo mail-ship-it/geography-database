@@ -96,13 +96,13 @@ function CategoryPage() {
       })
 
       const results = await Promise.all(promises)
-      const allQuestions: Question[] = results.flat().filter(Array.isArray ? (item): item is Question => true : Boolean)
+      const allQuestions = results.flat().filter((item): item is Question => item && typeof item === 'object')
 
-      setQuestions(allQuestions.flat())
+      setQuestions(allQuestions)
 
       // カテゴリを抽出
       const allCategories = new Set<string>()
-      allQuestions.flat().forEach((q: Question) => {
+      allQuestions.forEach((q: Question) => {
         if (q.category) {
           q.category.split(',').forEach(cat => allCategories.add(cat.trim()))
         }
