@@ -45,6 +45,7 @@ function createColumnMapping(headers: string[]): Record<string, number> {
     'isImportant': ['重要問題'],
     'questionText': ['問題文'],
     'explanation': ['解説文'],
+    'explanationSummary': ['解説要約文'],
     'notes': ['備考'],
     'imageUrl': ['画像URL', '画像url'],
   }
@@ -133,7 +134,7 @@ export async function GET(request: Request) {
         imageFile: imageUrlRaw,
         questionText: getValue('questionText'),
         fullQuestionText: getValue('questionText'),
-        explanation: getValue('explanation'),
+        explanation: getValue('explanationSummary') || getValue('explanation'),
       }
     })
 
