@@ -28,7 +28,7 @@ function CategoryPage() {
   const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([])
   const [categories, setCategories] = useState<string[]>([])
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [selectedYearExam, setSelectedYearExam] = useState<string>('')
+  const [selectedYearExam, setSelectedYearExam] = useState<string>('2025年本試験')
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('')
   const [searchText, setSearchText] = useState<string>('')
   const [loading, setLoading] = useState(false)
