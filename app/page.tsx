@@ -2,18 +2,12 @@
 
 import Link from 'next/link'
 import { Calendar, Search, FileText, BarChart3 } from 'lucide-react'
+import Header from './components/Header'
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-white">
-      {/* ヘッダー */}
-      <div className="bg-[#3ab5cd] text-white py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            共通テスト地理問題データベース
-          </h1>
-        </div>
-      </div>
+      <Header subtitle="2016〜2025年の過去問を収録" />
 
       {/* メイン選択画面 */}
       <div className="container mx-auto px-4 py-12">

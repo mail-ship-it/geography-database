@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Calendar, FileText, Download, BarChart3 } from 'lucide-react'
-import Link from 'next/link'
+import Header from '../components/Header'
 
 type YearInfo = {
   year: string
@@ -46,25 +46,7 @@ export default function YearPage() {
 
   return (
     <main className="min-h-screen bg-white">
-      {/* ヘッダー */}
-      <div className="bg-[#3ab5cd] text-white py-8">
-        <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold text-center mb-2">
-            共通テスト地理問題データベース
-          </h1>
-          <p className="text-center opacity-90">
-            年度別 - 問題・解答PDFと平均点
-          </p>
-          <div className="text-center mt-4">
-            <Link
-              href="/"
-              className="text-white hover:text-white/80 transition-colors"
-            >
-              ← トップページに戻る
-            </Link>
-          </div>
-        </div>
-      </div>
+      <Header subtitle="年度別 - 問題・解答PDFと平均点" showBackLink />
 
       <div className="container mx-auto px-4 py-6">
         {loading ? (

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Search, Tag, Calendar } from 'lucide-react'
+import Header from '../components/Header'
 
 type Question = {
   id: string
@@ -163,14 +164,7 @@ function CategoryPage() {
 
   return (
     <main className="min-h-screen bg-white">
-      {/* ヘッダー */}
-      <div className="bg-[#3ab5cd] text-white py-8">
-        <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold text-center mb-2">
-            共通テスト地理問題データベース
-          </h1>
-        </div>
-      </div>
+      <Header subtitle="分野別検索" showBackLink />
 
       {/* 検索パネル */}
       <div className="container mx-auto px-4 py-6">
