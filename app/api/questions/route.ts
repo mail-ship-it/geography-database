@@ -117,9 +117,10 @@ export async function GET(request: Request) {
       const subTagsString = getValue('subTags')
       const imageUrlRaw = getValue('imageUrl')
 
+      const questionId = getValue('questionId')
       return {
-        id: (index + 1).toString(),
-        questionId: getValue('questionId'),
+        id: questionId || `${year}_${examType}_${index + 1}`, // ユニークなIDを使用
+        questionId: questionId,
         category: mainTagsString,
         mainTags: mainTagsString ? mainTagsString.split(',').map((t: string) => t.trim()) : [],
         subTags: subTagsString ? subTagsString.split(',').map((t: string) => t.trim()) : [],
