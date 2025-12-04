@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Search, Tag, Calendar } from 'lucide-react'
+import Fuse from 'fuse.js'
 import Header from '../components/Header'
 
 type Question = {
@@ -129,6 +130,21 @@ function CategoryPage() {
     }
   }, [selectedYearExam, availableYearExams, fetchQuestionsForYear, fetchAllQuestions])
 
+  // Fuse.jsインスタンスを作成（questionsが変わるたびに再作成）
+  const fuse = useMemo(() => {
+    return new Fuse(questions, {
+      keys: [
+        { name: 'questionId', weight: 2 },
+        { name: 'category', weight: 2 },
+        { name: 'questionText', weight: 1 },
+        { name: 'fullQuestionText', weight: 1 },
+      ],
+      threshold: 0.4, // 0.0（完全一致）〜 1.0（何でもマッチ）、0.4は適度な曖昧さ
+      ignoreLocation: true, // 文字列のどこにあってもマッチ
+      includeScore: true,
+    })
+  }, [questions])
+
   const filterQuestions = useCallback(() => {
     let filtered = questions
 
@@ -143,18 +159,18 @@ function CategoryPage() {
     }
 
     if (searchText) {
-      const lower = searchText.toLowerCase()
-      filtered = filtered.filter(q =>
-        q.questionId?.toLowerCase().includes(lower) ||
-        q.category?.toLowerCase().includes(lower) ||
-        q.difficulty?.toLowerCase().includes(lower) ||
-        q.questionText?.toLowerCase().includes(lower) ||
-        q.fullQuestionText?.toLowerCase().includes(lower)
-      )
+      // Fuse.jsで曖昧検索
+      const fuseResults = fuse.search(searchText)
+      const matchedIds = new Set(fuseResults.map(r => r.item.id))
+      filtered = filtered.filter(q => matchedIds.has(q.id))
+
+      // スコア順にソート（低いほど良いマッチ）
+      const scoreMap = new Map(fuseResults.map(r => [r.item.id, r.score ?? 1]))
+      filtered = filtered.sort((a, b) => (scoreMap.get(a.id) ?? 1) - (scoreMap.get(b.id) ?? 1))
     }
 
     setFilteredQuestions(filtered)
-  }, [questions, selectedDifficulty, selectedCategories, searchText])
+  }, [questions, selectedDifficulty, selectedCategories, searchText, fuse])
 
   useEffect(() => {
     filterQuestions()
@@ -346,14 +362,6 @@ function CategoryPage() {
                         </span>
                       )}
                     </div>
-
-                    {/* 問題文 */}
-                    {question.fullQuestionText && (
-                      <div className="mb-4 p-4 bg-[#3ab5cd]/5 rounded-lg border-l-4 border-[#3ab5cd]">
-                        <h3 className="text-sm font-semibold text-[#2b6ca3] mb-2">問題文</h3>
-                        <p className="text-gray-800 leading-relaxed">{question.fullQuestionText}</p>
-                      </div>
-                    )}
 
                     {/* 問題画像 */}
                     {question.imageUrl && (
