@@ -139,7 +139,7 @@ function CategoryPage() {
         { name: 'questionText', weight: 1 },
         { name: 'fullQuestionText', weight: 1 },
       ],
-      threshold: 0.4, // 0.0（完全一致）〜 1.0（何でもマッチ）、0.4は適度な曖昧さ
+      threshold: 0.2, // 0.0（完全一致）〜 1.0（何でもマッチ）、0.2で少し曖昧
       ignoreLocation: true, // 文字列のどこにあってもマッチ
       includeScore: true,
     })
