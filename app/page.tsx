@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Calendar, Search, FileText, BarChart3 } from 'lucide-react'
+import { Calendar, Search, FileText, BarChart3, Shuffle } from 'lucide-react'
 import Header from './components/Header'
 
 export default function Home() {
@@ -16,7 +16,7 @@ export default function Home() {
             表示方式を選択してください
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* 年度ごとに表示 */}
             <Link href="/year" className="h-full">
               <div className="bg-white border border-[#e2e2e2] rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer group h-full flex flex-col">
@@ -73,6 +73,36 @@ export default function Home() {
                 </div>
                 <div className="bg-[#3ab5cd] text-white py-4 rounded-b-lg text-center font-medium group-hover:bg-[#2b6ca3] transition-colors">
                   分野別検索を開く →
+                </div>
+              </div>
+            </Link>
+
+            {/* ランダム演習 */}
+            <Link href="/practice" className="h-full">
+              <div className="bg-white border border-[#e2e2e2] rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer group h-full flex flex-col">
+                <div className="p-8 text-center flex-1 flex flex-col">
+                  <div className="bg-[#e63278]/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:bg-[#e63278]/20 transition-colors">
+                    <Shuffle className="w-10 h-10 text-[#e63278]" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-[#2b6ca3] mb-4">
+                    ランダム演習
+                  </h3>
+                  <p className="text-gray-600 mb-6 leading-relaxed flex-1">
+                    ランダムに出題される問題を解いて実力を確認できます
+                  </p>
+                  <div className="space-y-2 text-sm text-gray-500">
+                    <div className="flex items-center justify-center">
+                      <Shuffle className="w-4 h-4 mr-2" />
+                      ランダム出題
+                    </div>
+                    <div className="flex items-center justify-center">
+                      <FileText className="w-4 h-4 mr-2" />
+                      正答・解説表示
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-[#e63278] text-white py-4 rounded-b-lg text-center font-medium group-hover:bg-[#2b6ca3] transition-colors">
+                  演習を始める →
                 </div>
               </div>
             </Link>
