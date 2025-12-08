@@ -138,7 +138,7 @@ export default function PracticePage() {
   }
 
   const isCorrect = selectedAnswer === currentQuestion.answer
-  const answerOptions = ['1', '2', '3', '4', '5', '6']
+  const answerOptions = ['1', '2', '3', '4', '5', '6', '7', '8']
 
   return (
     <main className="min-h-screen bg-white">
@@ -224,7 +224,7 @@ export default function PracticePage() {
             {/* 選択肢 */}
             <div className="mb-6">
               <p className="text-sm text-gray-600 mb-3">選択肢を選んでください：</p>
-              <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+              <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
                 {answerOptions.map((option) => {
                   let buttonClass = 'border-2 border-[#e2e2e2] bg-white hover:border-[#3ab5cd] hover:bg-[#3ab5cd]/5'
 
