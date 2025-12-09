@@ -80,24 +80,8 @@ function CategoryPage() {
 
         if (Array.isArray(data)) {
           setQuestions(data)
-
-          // カテゴリを抽出（シートの順番を維持）
-          const allCategories = new Set<string>()
-          data.forEach((q: Question) => {
-            if (q.category) {
-              q.category.split(',').forEach(cat => allCategories.add(cat.trim()))
-            }
-          })
-          // tagOrderの順番でソート、tagOrderにないものは末尾に
-          const sortedCategories = Array.from(allCategories).sort((a, b) => {
-            const indexA = tagOrder.indexOf(a)
-            const indexB = tagOrder.indexOf(b)
-            if (indexA === -1 && indexB === -1) return a.localeCompare(b)
-            if (indexA === -1) return 1
-            if (indexB === -1) return -1
-            return indexA - indexB
-          })
-          setCategories(sortedCategories)
+          // tagOrderの全タグを表示（問題がないタグも含む）
+          setCategories(tagOrder)
         }
       }
     } catch (error) {
@@ -120,24 +104,8 @@ function CategoryPage() {
       const allQuestions = results.flat().filter((item): item is Question => item && typeof item === 'object')
 
       setQuestions(allQuestions)
-
-      // カテゴリを抽出（シートの順番を維持）
-      const allCategories = new Set<string>()
-      allQuestions.forEach((q: Question) => {
-        if (q.category) {
-          q.category.split(',').forEach(cat => allCategories.add(cat.trim()))
-        }
-      })
-      // tagOrderの順番でソート、tagOrderにないものは末尾に
-      const sortedCategories = Array.from(allCategories).sort((a, b) => {
-        const indexA = tagOrder.indexOf(a)
-        const indexB = tagOrder.indexOf(b)
-        if (indexA === -1 && indexB === -1) return a.localeCompare(b)
-        if (indexA === -1) return 1
-        if (indexB === -1) return -1
-        return indexA - indexB
-      })
-      setCategories(sortedCategories)
+      // tagOrderの全タグを表示（問題がないタグも含む）
+      setCategories(tagOrder)
     } catch (error) {
       console.error('Error fetching all questions:', error)
     }
