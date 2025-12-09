@@ -10,7 +10,6 @@ type Tip = {
   title: string
   content: string
   keywords: string
-  note: string
 }
 
 export default function TipsPage() {
@@ -252,9 +251,6 @@ export default function TipsPage() {
                       <div className="bg-[#feec00]/20 p-4 rounded-lg">
                         <p className="text-gray-800 leading-relaxed">{currentTip?.content}</p>
                       </div>
-                      {currentTip?.note && (
-                        <p className="text-sm text-gray-600">{currentTip?.note}</p>
-                      )}
                     </div>
                   )}
                 </div>

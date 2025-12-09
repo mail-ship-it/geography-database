@@ -21,10 +21,8 @@ export type Country = {
   populationLevel: string
   populationEstimate: string
   climate: string
-  industries: string
   keywords: string
-  note: string
-  story: string
+  description: string
 }
 
 export async function GET() {
@@ -33,7 +31,7 @@ export async function GET() {
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: STUDY_SPREADSHEET_ID,
-      range: 'Geo_Countries_72!A2:L100',
+      range: 'Geo_Countries_72!A2:J100',
     })
 
     const rows = response.data.values || []
@@ -47,10 +45,8 @@ export async function GET() {
       populationLevel: row[5] || '',
       populationEstimate: row[6] || '',
       climate: row[7] || '',
-      industries: row[8] || '',
-      keywords: row[9] || '',
-      note: row[10] || '',
-      story: row[11] || '',
+      keywords: row[8] || '',
+      description: row[9] || '',
     }))
 
     return NextResponse.json(countries)

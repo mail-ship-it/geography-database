@@ -13,10 +13,8 @@ type Country = {
   populationLevel: string
   populationEstimate: string
   climate: string
-  industries: string
   keywords: string
-  note: string
-  story: string
+  description: string
 }
 
 const REGIONS = [
@@ -68,7 +66,7 @@ export default function CountriesPage() {
       filtered = filtered.filter(c =>
         c.name.toLowerCase().includes(lower) ||
         c.keywords.toLowerCase().includes(lower) ||
-        c.industries.toLowerCase().includes(lower)
+        c.description.toLowerCase().includes(lower)
       )
     }
 
@@ -175,23 +173,23 @@ export default function CountriesPage() {
                   <th className="px-4 py-3 text-left font-medium">GDP</th>
                   <th className="px-4 py-3 text-left font-medium">人口</th>
                   <th className="px-4 py-3 text-left font-medium">気候</th>
-                  <th className="px-4 py-3 text-left font-medium hidden md:table-cell">主要産業</th>
+                  <th className="px-4 py-3 text-left font-medium hidden md:table-cell">キーワード</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredCountries.map((country, index) => (
                   <tr
                     key={country.id}
-                    className={`border-b border-gray-200 hover:bg-[#3ab5cd]/5 ${
+                    className={`border-b border-gray-200 hover:bg-[#3ab5cd]/10 ${
                       index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
                     }`}
                   >
                     <td className="px-4 py-3 font-medium text-[#2b6ca3]">{country.name}</td>
-                    <td className="px-4 py-3 text-sm">{country.region}</td>
-                    <td className="px-4 py-3 text-sm">{country.gdpLevel}</td>
-                    <td className="px-4 py-3 text-sm">{country.populationLevel}</td>
-                    <td className="px-4 py-3 text-sm">{country.climate}</td>
-                    <td className="px-4 py-3 text-sm hidden md:table-cell">{country.industries}</td>
+                    <td className="px-4 py-3 text-gray-800">{country.region}</td>
+                    <td className="px-4 py-3 text-gray-800">{country.gdpLevel}</td>
+                    <td className="px-4 py-3 text-gray-800">{country.populationLevel}</td>
+                    <td className="px-4 py-3 text-gray-800">{country.climate}</td>
+                    <td className="px-4 py-3 text-gray-800 hidden md:table-cell">{country.keywords}</td>
                   </tr>
                 ))}
               </tbody>
@@ -267,12 +265,12 @@ export default function CountriesPage() {
                         </div>
                       </div>
                       <div>
-                        <span className="text-gray-500 text-sm">主要産業:</span>
-                        <p className="font-medium">{currentCountry?.industries}</p>
+                        <span className="text-gray-500 text-sm">キーワード:</span>
+                        <p className="font-medium">{currentCountry?.keywords}</p>
                       </div>
                       <div className="bg-[#feec00]/20 p-3 rounded-lg">
                         <span className="text-gray-500 text-sm">試験でのポイント:</span>
-                        <p className="font-medium text-[#2b6ca3]">{currentCountry?.story}</p>
+                        <p className="font-medium text-[#2b6ca3]">{currentCountry?.description}</p>
                       </div>
                     </div>
                   )}
