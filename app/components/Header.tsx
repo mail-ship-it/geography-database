@@ -6,13 +6,18 @@ type HeaderProps = {
   title?: string
   subtitle?: string
   showBackLink?: boolean
+  backHref?: string
+  backLabel?: string
 }
 
 export default function Header({
   title = "共通テスト地理問題データベース",
   subtitle,
-  showBackLink = false
+  showBackLink = false,
+  backHref = "/",
+  backLabel
 }: HeaderProps) {
+  const defaultLabel = backHref === "/" ? "トップページに戻る" : "戻る"
   return (
     <div className="relative">
       <div className="bg-[#3ab5cd] text-white pt-8 pb-12">
@@ -20,10 +25,10 @@ export default function Header({
           {showBackLink && (
             <div className="mb-4">
               <Link
-                href="/"
+                href={backHref}
                 className="text-white/80 hover:text-white transition-colors text-sm"
               >
-                ← トップページに戻る
+                ← {backLabel || defaultLabel}
               </Link>
             </div>
           )}

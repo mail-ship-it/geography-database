@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Calendar, Search, FileText, BarChart3, Shuffle } from 'lucide-react'
+import { Calendar, Search, FileText, BarChart3, Shuffle, BookOpen } from 'lucide-react'
 import Header from './components/Header'
 
 export default function Home() {
@@ -16,7 +16,7 @@ export default function Home() {
             表示方式を選択してください
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* 年度ごとに表示 */}
             <Link href="/year" className="h-full">
               <div className="bg-white border border-[#e2e2e2] rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer group h-full flex flex-col">
@@ -103,6 +103,36 @@ export default function Home() {
                 </div>
                 <div className="bg-[#e63278] text-white py-4 rounded-b-lg text-center font-medium group-hover:bg-[#2b6ca3] transition-colors">
                   演習を始める →
+                </div>
+              </div>
+            </Link>
+
+            {/* 80点突破インプット */}
+            <Link href="/study" className="h-full">
+              <div className="bg-white border border-[#e2e2e2] rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer group h-full flex flex-col">
+                <div className="p-8 text-center flex-1 flex flex-col">
+                  <div className="bg-[#feec00]/30 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:bg-[#feec00]/50 transition-colors">
+                    <BookOpen className="w-10 h-10 text-[#2b6ca3]" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-[#2b6ca3] mb-4">
+                    80点インプット
+                  </h3>
+                  <p className="text-gray-600 mb-6 leading-relaxed flex-1">
+                    頻出72カ国と100のコツで80点突破の基礎を固めます
+                  </p>
+                  <div className="space-y-2 text-sm text-gray-500">
+                    <div className="flex items-center justify-center">
+                      <BookOpen className="w-4 h-4 mr-2" />
+                      頻出72カ国
+                    </div>
+                    <div className="flex items-center justify-center">
+                      <FileText className="w-4 h-4 mr-2" />
+                      100のコツ
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-[#feec00] text-[#2b6ca3] py-4 rounded-b-lg text-center font-medium group-hover:bg-[#2b6ca3] group-hover:text-white transition-colors">
+                  学習を始める →
                 </div>
               </div>
             </Link>
