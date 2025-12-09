@@ -38,23 +38,34 @@ function CategoryPage() {
   const [showImages, setShowImages] = useState<{ [key: string]: boolean }>({})
   const [displayCount, setDisplayCount] = useState(5)
   const [availableYearExams, setAvailableYearExams] = useState<YearExam[]>([])
+  const [tagOrder, setTagOrder] = useState<string[]>([])
 
-  // 初期読み込み: 年度リストのみ取得
+  // 初期読み込み: 年度リストとタグ順序を取得
   useEffect(() => {
-    const fetchYearExams = async () => {
+    const fetchInitialData = async () => {
       try {
-        const response = await fetch('/api/sheet-info')
-        const data = await response.json()
-        if (data.yearExams && Array.isArray(data.yearExams)) {
-          setAvailableYearExams(data.yearExams)
+        const [sheetResponse, tagsResponse] = await Promise.all([
+          fetch('/api/sheet-info'),
+          fetch('/api/tags')
+        ])
+
+        const sheetData = await sheetResponse.json()
+        if (sheetData.yearExams && Array.isArray(sheetData.yearExams)) {
+          setAvailableYearExams(sheetData.yearExams)
         }
+
+        const tagsData = await tagsResponse.json()
+        if (Array.isArray(tagsData)) {
+          setTagOrder(tagsData)
+        }
+
         setInitialLoading(false)
       } catch (error) {
-        console.error('Error fetching year exams:', error)
+        console.error('Error fetching initial data:', error)
         setInitialLoading(false)
       }
     }
-    fetchYearExams()
+    fetchInitialData()
   }, [])
 
   // 年度選択時にデータを取得
@@ -70,21 +81,30 @@ function CategoryPage() {
         if (Array.isArray(data)) {
           setQuestions(data)
 
-          // カテゴリを抽出
+          // カテゴリを抽出（シートの順番を維持）
           const allCategories = new Set<string>()
           data.forEach((q: Question) => {
             if (q.category) {
               q.category.split(',').forEach(cat => allCategories.add(cat.trim()))
             }
           })
-          setCategories(Array.from(allCategories).sort())
+          // tagOrderの順番でソート、tagOrderにないものは末尾に
+          const sortedCategories = Array.from(allCategories).sort((a, b) => {
+            const indexA = tagOrder.indexOf(a)
+            const indexB = tagOrder.indexOf(b)
+            if (indexA === -1 && indexB === -1) return a.localeCompare(b)
+            if (indexA === -1) return 1
+            if (indexB === -1) return -1
+            return indexA - indexB
+          })
+          setCategories(sortedCategories)
         }
       }
     } catch (error) {
       console.error('Error fetching questions:', error)
     }
     setLoading(false)
-  }, [])
+  }, [tagOrder])
 
   // 全年度のデータを並列取得
   const fetchAllQuestions = useCallback(async () => {
@@ -101,19 +121,28 @@ function CategoryPage() {
 
       setQuestions(allQuestions)
 
-      // カテゴリを抽出
+      // カテゴリを抽出（シートの順番を維持）
       const allCategories = new Set<string>()
       allQuestions.forEach((q: Question) => {
         if (q.category) {
           q.category.split(',').forEach(cat => allCategories.add(cat.trim()))
         }
       })
-      setCategories(Array.from(allCategories).sort())
+      // tagOrderの順番でソート、tagOrderにないものは末尾に
+      const sortedCategories = Array.from(allCategories).sort((a, b) => {
+        const indexA = tagOrder.indexOf(a)
+        const indexB = tagOrder.indexOf(b)
+        if (indexA === -1 && indexB === -1) return a.localeCompare(b)
+        if (indexA === -1) return 1
+        if (indexB === -1) return -1
+        return indexA - indexB
+      })
+      setCategories(sortedCategories)
     } catch (error) {
       console.error('Error fetching all questions:', error)
     }
     setLoading(false)
-  }, [availableYearExams])
+  }, [availableYearExams, tagOrder])
 
   // 年度が変更されたらデータを取得
   useEffect(() => {
@@ -153,9 +182,10 @@ function CategoryPage() {
     }
 
     if (selectedCategories.length > 0) {
-      filtered = filtered.filter(q =>
-        selectedCategories.every(cat => q.category?.includes(cat))
-      )
+      filtered = filtered.filter(q => {
+        const questionTags = q.category?.split(',').map(t => t.trim()) || []
+        return selectedCategories.every(cat => questionTags.includes(cat))
+      })
     }
 
     if (searchText) {
