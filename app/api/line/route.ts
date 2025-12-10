@@ -575,30 +575,42 @@ async function searchQuestionsByCategory(category: string): Promise<Question[]> 
 // 72カ国データ用のスプレッドシートID
 const COUNTRY_DATA_SPREADSHEET_ID = '1DOE8cJNxf4SkosUooveiGQTQuod1uzdJK3n9wS4O5G4';
 
-// 講義データのキャッシュ（MDファイルから読み込み）
-let lecturesCache: string | null = null;
+// ナレッジデータのキャッシュ（MDファイルから読み込み）
+let knowledgeCache: string | null = null;
 
-// 講義データを読み込み（MDファイルから）
-function loadLectureData(): string {
-  if (lecturesCache) {
-    return lecturesCache;
+// ナレッジデータを読み込み（授業内容 + 過去問解説）
+function loadKnowledgeData(): string {
+  if (knowledgeCache) {
+    return knowledgeCache;
   }
 
   try {
-    const filePath = path.join(process.cwd(), 'lecture-content-combined.md');
-    lecturesCache = fs.readFileSync(filePath, 'utf-8');
-    console.log(`Loaded lecture content: ${lecturesCache.length} characters`);
-    return lecturesCache;
+    const lectureFile = path.join(process.cwd(), 'lecture-content-combined.md');
+    const examFile = path.join(process.cwd(), 'exam-explanations.md');
+
+    let content = '';
+
+    if (fs.existsSync(lectureFile)) {
+      content += fs.readFileSync(lectureFile, 'utf-8');
+    }
+
+    if (fs.existsSync(examFile)) {
+      content += '\n\n' + fs.readFileSync(examFile, 'utf-8');
+    }
+
+    knowledgeCache = content;
+    console.log(`Loaded knowledge content: ${knowledgeCache.length} characters`);
+    return knowledgeCache;
   } catch (error) {
-    console.error('Error loading lecture data:', error);
+    console.error('Error loading knowledge data:', error);
     return '';
   }
 }
 
-// 講義データからキーワード検索（MD形式対応）
+// ナレッジからキーワード検索（MD形式対応）
 function searchLecturesForRAG(userQuery: string, maxResults: number = 2): string[] {
-  const lectureContent = loadLectureData();
-  if (!lectureContent) return [];
+  const knowledgeContent = loadKnowledgeData();
+  if (!knowledgeContent) return [];
 
   // ストップワード
   const stopWords = ['の', 'は', 'が', 'を', 'に', 'で', 'と', 'から', 'まで', 'より', 'について', 'とは', 'って', '何', 'どう', 'なぜ', 'どの', 'どこ', 'いつ', 'だれ', 'わから', 'ない', '教えて', 'ください', 'です', 'ます', 'した', 'する', 'ある', 'いる', 'こと', 'もの', 'よう', 'ため'];
@@ -612,8 +624,8 @@ function searchLecturesForRAG(userQuery: string, maxResults: number = 2): string
     return [];
   }
 
-  // MDファイルを授業ごとに分割（## で始まるセクション）
-  const sections = lectureContent.split(/\n---\n/).filter(s => s.trim());
+  // MDファイルをセクションごとに分割（---または### で区切る）
+  const sections = knowledgeContent.split(/\n---\n|\n### /).filter(s => s.trim());
 
   // 各セクションをスコアリング
   const scoredSections = sections.map(section => {
@@ -626,11 +638,12 @@ function searchLecturesForRAG(userQuery: string, maxResults: number = 2): string
       score += matches * 2;
     }
 
-    // 日付を抽出（## XX/XX の授業）
+    // ソースを抽出（授業日付 or 問題ID）
     const dateMatch = section.match(/## (\d+\/\d+) の授業/);
-    const date = dateMatch ? dateMatch[1] : '不明';
+    const examMatch = section.match(/^(\d{4}_[^_]+_\d+)/);
+    const source = dateMatch ? `${dateMatch[1]}の授業` : examMatch ? examMatch[1] : '参考資料';
 
-    return { section, score, date };
+    return { section, score, source };
   });
 
   // スコア順にソートして上位を返す
@@ -643,7 +656,7 @@ function searchLecturesForRAG(userQuery: string, maxResults: number = 2): string
     return [];
   }
 
-  console.log(`Lecture RAG: Found ${topSections.length} relevant sections for keywords: ${keywords.join(', ')}`);
+  console.log(`Knowledge RAG: Found ${topSections.length} relevant sections for keywords: ${keywords.join(', ')}`);
 
   // 関連する段落を抽出
   return topSections.map(s => {
@@ -661,7 +674,7 @@ function searchLecturesForRAG(userQuery: string, maxResults: number = 2): string
       if (relevantParagraphs.length >= 3) break;
     }
 
-    return `【${s.date}の授業より】\n${relevantParagraphs.join('\n')}`;
+    return `【${s.source}より】\n${relevantParagraphs.join('\n')}`;
   });
 }
 
