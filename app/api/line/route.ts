@@ -575,37 +575,30 @@ async function searchQuestionsByCategory(category: string): Promise<Question[]> 
 // 72カ国データ用のスプレッドシートID
 const COUNTRY_DATA_SPREADSHEET_ID = '1DOE8cJNxf4SkosUooveiGQTQuod1uzdJK3n9wS4O5G4';
 
-// 講義データの型定義
-interface LectureData {
-  date: string;
-  title: string;
-  text: string;
-}
+// 講義データのキャッシュ（MDファイルから読み込み）
+let lecturesCache: string | null = null;
 
-// 講義データのキャッシュ
-let lecturesCache: LectureData[] | null = null;
-
-// 講義データを読み込み
-function loadLectureData(): LectureData[] {
+// 講義データを読み込み（MDファイルから）
+function loadLectureData(): string {
   if (lecturesCache) {
     return lecturesCache;
   }
 
   try {
-    const filePath = path.join(process.cwd(), 'lecture-summaries.json');
-    const data = fs.readFileSync(filePath, 'utf-8');
-    lecturesCache = JSON.parse(data);
-    console.log(`Loaded ${lecturesCache?.length || 0} lecture summaries`);
-    return lecturesCache || [];
+    const filePath = path.join(process.cwd(), 'lecture-content-combined.md');
+    lecturesCache = fs.readFileSync(filePath, 'utf-8');
+    console.log(`Loaded lecture content: ${lecturesCache.length} characters`);
+    return lecturesCache;
   } catch (error) {
     console.error('Error loading lecture data:', error);
-    return [];
+    return '';
   }
 }
 
-// 講義データからキーワード検索
+// 講義データからキーワード検索（MD形式対応）
 function searchLecturesForRAG(userQuery: string, maxResults: number = 2): string[] {
-  const lectures = loadLectureData();
+  const lectureContent = loadLectureData();
+  if (!lectureContent) return [];
 
   // ストップワード
   const stopWords = ['の', 'は', 'が', 'を', 'に', 'で', 'と', 'から', 'まで', 'より', 'について', 'とは', 'って', '何', 'どう', 'なぜ', 'どの', 'どこ', 'いつ', 'だれ', 'わから', 'ない', '教えて', 'ください', 'です', 'ます', 'した', 'する', 'ある', 'いる', 'こと', 'もの', 'よう', 'ため'];
@@ -619,37 +612,42 @@ function searchLecturesForRAG(userQuery: string, maxResults: number = 2): string
     return [];
   }
 
-  // スコアリング
-  const scoredLectures = lectures.map(lecture => {
+  // MDファイルを授業ごとに分割（## で始まるセクション）
+  const sections = lectureContent.split(/\n---\n/).filter(s => s.trim());
+
+  // 各セクションをスコアリング
+  const scoredSections = sections.map(section => {
     let score = 0;
-    const searchText = lecture.text.toLowerCase();
+    const searchText = section.toLowerCase();
 
     for (const keyword of keywords) {
       const kw = keyword.toLowerCase();
-      // キーワードが含まれる回数をカウント
       const matches = (searchText.match(new RegExp(kw, 'g')) || []).length;
       score += matches * 2;
     }
 
-    return { lecture, score };
+    // 日付を抽出（## XX/XX の授業）
+    const dateMatch = section.match(/## (\d+\/\d+) の授業/);
+    const date = dateMatch ? dateMatch[1] : '不明';
+
+    return { section, score, date };
   });
 
   // スコア順にソートして上位を返す
-  const topLectures = scoredLectures
-    .filter(sl => sl.score > 0)
+  const topSections = scoredSections
+    .filter(s => s.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, maxResults);
 
-  if (topLectures.length === 0) {
+  if (topSections.length === 0) {
     return [];
   }
 
-  console.log(`Lecture RAG: Found ${topLectures.length} relevant lectures for keywords: ${keywords.join(', ')}`);
+  console.log(`Lecture RAG: Found ${topSections.length} relevant sections for keywords: ${keywords.join(', ')}`);
 
-  // 関連する講義内容を抽出
-  return topLectures.map(sl => {
-    // キーワードを含む段落を抽出
-    const paragraphs = sl.lecture.text.split('\n').filter(p => p.trim().length > 0);
+  // 関連する段落を抽出
+  return topSections.map(s => {
+    const paragraphs = s.section.split('\n').filter(p => p.trim().length > 0);
     const relevantParagraphs: string[] = [];
 
     for (const paragraph of paragraphs) {
@@ -663,7 +661,7 @@ function searchLecturesForRAG(userQuery: string, maxResults: number = 2): string
       if (relevantParagraphs.length >= 3) break;
     }
 
-    return `【${sl.lecture.date}の授業より】\n${relevantParagraphs.join('\n')}`;
+    return `【${s.date}の授業より】\n${relevantParagraphs.join('\n')}`;
   });
 }
 
