@@ -12,7 +12,32 @@ export const getGoogleSheetsClient = () => {
 }
 
 export const SPREADSHEET_ID = '1eqwocYOk34aANN78AuRzocV6l7NJll79yI_YOR3eocw'
+export const PROMPTS_SPREADSHEET_ID = '1DOE8cJNxf4SkosUooveiGQTQuod1uzdJK3n9wS4O5G4'
 export const SHEET_NAME = '2024年本試験'
+
+// AIプロンプトを取得する関数
+export async function getAIPrompt(promptType: string): Promise<string | null> {
+  try {
+    const sheets = getGoogleSheetsClient()
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: PROMPTS_SPREADSHEET_ID,
+      range: 'A:B',
+    })
+
+    const rows = response.data.values
+    if (!rows) return null
+
+    for (const row of rows) {
+      if (row[0] === promptType) {
+        return row[1] || null
+      }
+    }
+    return null
+  } catch (error) {
+    console.error('Error fetching AI prompt:', error)
+    return null
+  }
+}
 
 // シート名マッピング（後方互換性のため保持）
 export const SHEET_NAMES: { [key: string]: string } = {
