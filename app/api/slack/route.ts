@@ -8,6 +8,9 @@ const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN!;
 const SLACK_SIGNING_SECRET = process.env.SLACK_SIGNING_SECRET!;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY!;
 
+// タスク管理用チャンネル
+const DAILY_TASKS_CHANNEL = 'C0A3R590PHT';
+
 // Slack Web API Client
 const slackClient = new WebClient(SLACK_BOT_TOKEN);
 
@@ -52,9 +55,16 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ ok: true });
       }
 
-      // Claude Code風の応答を生成
-      const response = await runClaude(userMessage, userId);
-      await postToSlack(channel, response);
+      // チャンネル別に処理を分岐
+      if (channel === DAILY_TASKS_CHANNEL) {
+        // タスク管理モード
+        const response = await runTaskManager(userMessage, userId);
+        await postToSlack(channel, response);
+      } else {
+        // Claude Code風の応答を生成
+        const response = await runClaude(userMessage, userId);
+        await postToSlack(channel, response);
+      }
     }
 
     return NextResponse.json({ ok: true });
@@ -133,5 +143,75 @@ async function postToSlack(channel: string, text: string) {
     });
   } catch (error) {
     console.error('Error posting to Slack:', error);
+  }
+}
+
+// タスク管理用セッション
+const taskSessions = new Map<string, { messages: MessageParam[] }>();
+
+async function runTaskManager(prompt: string, userId: string): Promise<string> {
+  try {
+    let session = taskSessions.get(userId);
+    if (!session) {
+      session = { messages: [] };
+      taskSessions.set(userId, session);
+    }
+
+    session.messages.push({
+      role: 'user',
+      content: prompt,
+    });
+
+    if (session.messages.length > 20) {
+      session.messages = session.messages.slice(-20);
+    }
+
+    const message = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1024,
+      system: `あなたは優しく有能な上司として、タスク管理をサポートします。
+
+役割:
+- ユーザーが挙げたタスクを整理・分解する
+- 優先順位付けを手伝う
+- 完了確認を行う
+- 励ましつつも理性的に対応する
+
+スタイル:
+- 丁寧だが簡潔
+- 過度に感情的にならない
+- 具体的なアクションを提示
+
+タスクが挙げられたら:
+1. タスクを確認し、必要なら分解を提案
+2. 優先順位があれば確認
+3. 「今日はこれで進めましょう」と締める
+
+完了報告があったら:
+1. 確認・承認
+2. 次のタスクがあれば確認
+3. なければ労いの言葉`,
+      messages: session.messages,
+    });
+
+    const responseText = message.content
+      .filter((block): block is TextBlock => block.type === 'text')
+      .map((block) => block.text)
+      .join('\n');
+
+    session.messages.push({
+      role: 'assistant',
+      content: responseText,
+    });
+
+    if (responseText.length > 3000) {
+      return responseText.substring(0, 3000) + '\n\n...(省略)';
+    }
+
+    return responseText;
+  } catch (error: unknown) {
+    console.error('Error in task manager:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return `エラーが発生しました: ${errorMessage}`;
   }
 }
