@@ -48,11 +48,13 @@ export async function POST(req: NextRequest) {
       const userMessage = data.event.text;
       const channel = data.event.channel;
       const userId = data.event.user;
+      // スレッド返信用: 既存スレッドならthread_ts、新規ならメッセージのtsを使用
+      const threadTs = data.event.thread_ts || data.event.ts;
 
       // リセットコマンド
       if (userMessage === 'リセット' || userMessage === 'reset') {
         sessions.delete(userId);
-        await postToSlack(channel, 'セッションをリセットしました');
+        await postToSlack(channel, 'セッションをリセットしました', threadTs);
         return NextResponse.json({ ok: true });
       }
 
@@ -60,11 +62,11 @@ export async function POST(req: NextRequest) {
       if (channel === DAILY_TASKS_CHANNEL) {
         // タスク管理モード
         const response = await runTaskManager(userMessage, userId);
-        await postToSlack(channel, response);
+        await postToSlack(channel, response, threadTs);
       } else {
         // Claude Code風の応答を生成
         const response = await runClaude(userMessage, userId);
-        await postToSlack(channel, response);
+        await postToSlack(channel, response, threadTs);
       }
     }
 
@@ -136,11 +138,12 @@ async function runClaude(prompt: string, userId: string): Promise<string> {
   }
 }
 
-async function postToSlack(channel: string, text: string) {
+async function postToSlack(channel: string, text: string, threadTs?: string) {
   try {
     await slackClient.chat.postMessage({
       channel,
       text,
+      thread_ts: threadTs,
     });
   } catch (error) {
     console.error('Error posting to Slack:', error);
