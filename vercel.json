@@ -2,11 +2,11 @@
   "crons": [
     {
       "path": "/api/cron/daily-task",
-      "schedule": "0 1 * * *"
+      "schedule": "0 23 * * *"
     },
     {
       "path": "/api/cron/task-reminder",
-      "schedule": "0 5 * * *"
+      "schedule": "0 2 * * *"
     }
   ]
 }
