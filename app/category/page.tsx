@@ -137,6 +137,7 @@ function CategoryPage() {
         { name: 'subTags', weight: 2 },
         { name: 'questionText', weight: 1 },
         { name: 'fullQuestionText', weight: 1 },
+        { name: 'explanation', weight: 1 },
       ],
       threshold: 0.2, // 0.0（完全一致）〜 1.0（何でもマッチ）、0.2で厳密
       ignoreLocation: true, // 文字列のどこにあってもマッチ
