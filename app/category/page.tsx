@@ -9,6 +9,7 @@ type Question = {
   id: string
   questionId: string
   category: string
+  subTags?: string[]
   answer: string
   difficulty: string
   imageUrl: string
@@ -133,10 +134,11 @@ function CategoryPage() {
       keys: [
         { name: 'questionId', weight: 2 },
         { name: 'category', weight: 2 },
+        { name: 'subTags', weight: 2 },
         { name: 'questionText', weight: 1 },
         { name: 'fullQuestionText', weight: 1 },
       ],
-      threshold: 0.6, // 0.0（完全一致）〜 1.0（何でもマッチ）、0.6でかなり曖昧
+      threshold: 0.2, // 0.0（完全一致）〜 1.0（何でもマッチ）、0.2で厳密
       ignoreLocation: true, // 文字列のどこにあってもマッチ
       includeScore: true,
     })
@@ -268,7 +270,7 @@ function CategoryPage() {
                 type="text"
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
-                placeholder="問題ID、分野名で検索"
+                placeholder="問題ID、分野名、国名で検索"
                 className="w-full px-3 py-2 border border-[#e2e2e2] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3ab5cd]"
               />
             </div>
