@@ -32,7 +32,7 @@ export default function CountriesPage() {
   const [countries, setCountries] = useState<Country[]>([])
   const [filteredCountries, setFilteredCountries] = useState<Country[]>([])
   const [loading, setLoading] = useState(true)
-  const [mode, setMode] = useState<'list' | 'memorize'>('list')
+  const [mode, setMode] = useState<'list' | 'memorize'>('memorize')
   const [currentIndex, setCurrentIndex] = useState(0)
   const [step, setStep] = useState(0)  // 0: 地図, 1: 国名, 2: 人口, 3: 所得, 4: 気候, 5: キーワード
   const [selectedRegion, setSelectedRegion] = useState('全て')
@@ -254,7 +254,9 @@ export default function CountriesPage() {
                       ) : (
                         <Globe className="w-24 h-24 text-[#3ab5cd] mb-4" />
                       )}
-                      <p className="text-xl text-gray-700 mt-4">国名は？</p>
+                      <div className="bg-[#3ab5cd]/10 border-2 border-[#3ab5cd] rounded-lg px-6 py-4 mt-6">
+                        <p className="text-2xl font-bold text-[#2b6ca3]">国名は？</p>
+                      </div>
                     </div>
                   )}
 
@@ -264,7 +266,9 @@ export default function CountriesPage() {
                       <h2 className="text-4xl font-bold text-[#2b6ca3]">
                         {currentCountry?.name}
                       </h2>
-                      <p className="text-xl text-gray-700 mt-6">人口規模は？</p>
+                      <div className="bg-[#3ab5cd]/10 border-2 border-[#3ab5cd] rounded-lg px-6 py-4 mt-8">
+                        <p className="text-2xl font-bold text-[#2b6ca3]">人口規模は？</p>
+                      </div>
                     </div>
                   )}
 
@@ -279,7 +283,9 @@ export default function CountriesPage() {
                           ({currentCountry?.populationEstimate}万人)
                         </p>
                       </div>
-                      <p className="text-xl text-gray-700 mt-6">所得レベルは？</p>
+                      <div className="bg-[#3ab5cd]/10 border-2 border-[#3ab5cd] rounded-lg px-6 py-4 mt-8">
+                        <p className="text-2xl font-bold text-[#2b6ca3]">所得レベルは？</p>
+                      </div>
                     </div>
                   )}
 
@@ -294,7 +300,9 @@ export default function CountriesPage() {
                           ({currentCountry?.gdpEstimate}ドル)
                         </p>
                       </div>
-                      <p className="text-xl text-gray-700 mt-6">気候は？</p>
+                      <div className="bg-[#3ab5cd]/10 border-2 border-[#3ab5cd] rounded-lg px-6 py-4 mt-8">
+                        <p className="text-2xl font-bold text-[#2b6ca3]">気候は？</p>
+                      </div>
                     </div>
                   )}
 
@@ -304,7 +312,9 @@ export default function CountriesPage() {
                       <p className="text-3xl font-bold text-[#2b6ca3]">
                         {currentCountry?.climate}
                       </p>
-                      <p className="text-xl text-gray-700 mt-6">キーワードは？</p>
+                      <div className="bg-[#3ab5cd]/10 border-2 border-[#3ab5cd] rounded-lg px-6 py-4 mt-8">
+                        <p className="text-2xl font-bold text-[#2b6ca3]">キーワードは？</p>
+                      </div>
                     </div>
                   )}
 

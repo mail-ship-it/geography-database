@@ -30,6 +30,7 @@ export default function TipDetailPage() {
   const [tip, setTip] = useState<Tip | null>(null)
   const [questions, setQuestions] = useState<Question[]>([])
   const [showAnswers, setShowAnswers] = useState<Record<string, boolean>>({})
+  const [showExplanation, setShowExplanation] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -43,29 +44,20 @@ export default function TipDetailPage() {
 
           // 関連問題がある場合、tipのG列、H列を使用
           if (tipData.relatedQuestions) {
-            const questionIds = tipData.relatedQuestions.split(',').map((q: string) => q.trim())
+            const questionIds = tipData.relatedQuestions
+              .split(',')
+              .map((q: string) => q.trim())
+              .filter((q: string) => q.length > 0)  // 空文字列を除外
 
-            // 最初の問題のみG列の画像とH列の解答を使用
+            // 問題IDがある場合のみ処理
             if (questionIds.length > 0) {
-              const questions = questionIds.map((qid: string, index: number) => {
-                if (index === 0) {
-                  // 最初の問題: tipのG列（imageUrl）とH列（answer）を使用
-                  return {
-                    id: qid,
-                    questionId: qid,
-                    imageUrl: tipData.imageUrl || '',
-                    answer: tipData.answer || ''
-                  }
-                } else {
-                  // 2番目以降: 問題IDのみ表示（画像・解答なし）
-                  return {
-                    id: qid,
-                    questionId: qid,
-                    imageUrl: '',
-                    answer: ''
-                  }
-                }
-              })
+              // 全ての問題にG列の画像とH列の解答を使用（1つのコツに対して画像は1つ）
+              const questions = questionIds.map((qid: string) => ({
+                id: qid,
+                questionId: qid,
+                imageUrl: tipData.imageUrl || '',
+                answer: tipData.answer || ''
+              }))
               setQuestions(questions)
             }
           }
@@ -160,52 +152,59 @@ export default function TipDetailPage() {
                     />
                   </div>
                 )}
-
-                {/* 解答表示/非表示ボタン */}
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setShowAnswers(prev => ({
-                      ...prev,
-                      [question.id]: !prev[question.id]
-                    }))}
-                    className="flex items-center gap-2 px-4 py-2 bg-[#2b6ca3] text-white rounded-lg hover:bg-[#3ab5cd] transition-colors"
-                  >
-                    {showAnswers[question.id] ? (
-                      <>
-                        <EyeOff className="w-4 h-4" />
-                        解答を隠す
-                      </>
-                    ) : (
-                      <>
-                        <Eye className="w-4 h-4" />
-                        解答を表示
-                      </>
-                    )}
-                  </button>
-
-                  {/* 解答 */}
-                  {showAnswers[question.id] && question.answer && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-700">正答:</span>
-                      <span className="bg-[#feec00]/30 text-gray-900 px-4 py-2 rounded-lg font-bold text-lg">
-                        {question.answer}
-                      </span>
-                    </div>
-                  )}
-                </div>
               </div>
             ))}
           </div>
         )}
 
-        {/* 解説 */}
-        {tip.explanationSummary && (
+        {/* 解答・解説セクション */}
+        {(questions.length > 0 || tip.explanationSummary) && (
           <div className="bg-[#3ab5cd]/5 border border-[#3ab5cd]/30 rounded-lg p-6 mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-lg">💡</span>
-              <h2 className="font-bold text-gray-900">解説</h2>
-            </div>
-            <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">{tip.explanationSummary}</p>
+            <button
+              onClick={() => setShowExplanation(!showExplanation)}
+              className="w-full flex items-center justify-between gap-2 mb-3"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-lg">💡</span>
+                <h2 className="font-bold text-gray-900">解答・解説</h2>
+              </div>
+              <div className="flex items-center gap-2 px-4 py-2 bg-[#2b6ca3] text-white rounded-lg hover:bg-[#3ab5cd] transition-colors">
+                {showExplanation ? (
+                  <>
+                    <EyeOff className="w-4 h-4" />
+                    <span className="text-sm">隠す</span>
+                  </>
+                ) : (
+                  <>
+                    <Eye className="w-4 h-4" />
+                    <span className="text-sm">表示</span>
+                  </>
+                )}
+              </div>
+            </button>
+
+            {showExplanation && (
+              <div className="space-y-4">
+                {/* 解答 */}
+                {questions.length > 0 && questions[0].answer && (
+                  <div className="border-t border-[#3ab5cd]/20 pt-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-sm font-medium text-gray-700">正答:</span>
+                      <span className="bg-[#feec00]/30 text-gray-900 px-4 py-2 rounded-lg font-bold text-lg">
+                        {questions[0].answer}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* 解説 */}
+                {tip.explanationSummary && (
+                  <div className="border-t border-[#3ab5cd]/20 pt-4">
+                    <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">{tip.explanationSummary}</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
