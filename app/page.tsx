@@ -16,7 +16,7 @@ export default function Home() {
             表示方式を選択してください
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {/* 年度ごとに表示 */}
             <Link href="/year" className="h-full">
               <div className="bg-white border border-[#e2e2e2] rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer group h-full flex flex-col">
@@ -27,7 +27,7 @@ export default function Home() {
                   <h3 className="text-2xl font-bold text-[#2b6ca3] mb-4">
                     年度ごとに表示
                   </h3>
-                  <p className="text-gray-600 mb-6 leading-relaxed flex-1">
+                  <p className="text-gray-600 mb-6 leading-relaxed flex-1 min-h-[80px]">
                     各年度の本試験・追試験の問題PDF、解答PDF、平均点を一覧で確認できます
                   </p>
                   <div className="space-y-2 text-sm text-gray-500">
@@ -57,7 +57,7 @@ export default function Home() {
                   <h3 className="text-2xl font-bold text-[#2b6ca3] mb-4">
                     分野ごとに表示
                   </h3>
-                  <p className="text-gray-600 mb-6 leading-relaxed flex-1">
+                  <p className="text-gray-600 mb-6 leading-relaxed flex-1 min-h-[80px]">
                     分野タグや年度で絞り込んで、個別の問題を詳細に確認・検索できます
                   </p>
                   <div className="space-y-2 text-sm text-gray-500">
@@ -87,7 +87,7 @@ export default function Home() {
                   <h3 className="text-2xl font-bold text-[#2b6ca3] mb-4 whitespace-nowrap">
                     ランダム演習
                   </h3>
-                  <p className="text-gray-600 mb-6 leading-relaxed flex-1">
+                  <p className="text-gray-600 mb-6 leading-relaxed flex-1 min-h-[80px]">
                     ランダムに出題される問題を解いて<br />実力を確認できます
                   </p>
                   <div className="space-y-2 text-sm text-gray-500">
@@ -117,7 +117,7 @@ export default function Home() {
                   <h3 className="text-2xl font-bold text-[#2b6ca3] mb-4 whitespace-nowrap">
                     80点インプット
                   </h3>
-                  <p className="text-gray-600 mb-6 leading-relaxed flex-1">
+                  <p className="text-gray-600 mb-6 leading-relaxed flex-1 min-h-[80px]">
                     頻出76カ国と100のコツで<br />80点突破の基礎を固めます
                   </p>
                   <div className="space-y-2 text-sm text-gray-500">
