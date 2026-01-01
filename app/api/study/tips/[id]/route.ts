@@ -24,11 +24,11 @@ export type Tip = {
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const sheets = getGoogleSheetsClient()
-    const { id } = params
+    const { id } = await params
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: STUDY_SPREADSHEET_ID,
