@@ -19,7 +19,7 @@ export default function StudyPage() {
                   <Globe className="w-8 h-8 text-[#3ab5cd]" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-[#2b6ca3]">頻出72カ国</h3>
+                  <h3 className="text-xl font-bold text-[#2b6ca3]">頻出76カ国</h3>
                   <p className="text-sm text-gray-600">共通テストに出る国を完全網羅</p>
                 </div>
               </div>

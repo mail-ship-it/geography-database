@@ -100,7 +100,7 @@ export default function CountriesPage() {
 
   return (
     <main className="min-h-screen bg-white">
-      <Header subtitle="頻出72カ国" showBackLink backHref="/study" />
+      <Header subtitle="頻出76カ国" showBackLink backHref="/study" />
 
       <div className="container mx-auto px-4 py-6">
         {/* モード切り替え */}
