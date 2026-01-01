@@ -13,6 +13,8 @@ type Tip = {
   keywords: string
   relatedQuestions: string
   imageUrl: string
+  answer: string
+  explanationSummary: string
 }
 
 type Question = {
@@ -53,15 +55,30 @@ export default function TipDetailPage() {
           // 関連問題がある場合、問題データを取得
           if (tipData.relatedQuestions) {
             const questionIds = tipData.relatedQuestions.split(',').map((q: string) => q.trim())
-            const questionPromises = questionIds.map(async (qid: string) => {
+            const questionPromises = questionIds.map(async (qid: string, index: number) => {
               const parsed = parseQuestionId(qid)
-              if (!parsed) return null
 
-              const qResponse = await fetch(`/api/questions?year=${parsed.year}&examType=${parsed.examType}`)
-              if (qResponse.ok) {
-                const allQuestions = await qResponse.json()
-                return allQuestions.find((q: Question) => q.questionId === qid)
+              // 地理Bシートから取得を試みる
+              if (parsed) {
+                const qResponse = await fetch(`/api/questions?year=${parsed.year}&examType=${parsed.examType}`)
+                if (qResponse.ok) {
+                  const allQuestions = await qResponse.json()
+                  const found = allQuestions.find((q: Question) => q.questionId === qid)
+                  if (found) return found
+                }
               }
+
+              // 地理Bシートから取得できない場合、tipのデータを使用
+              // 最初の関連問題の場合のみ、G列の画像とH列の解答を使用
+              if (index === 0) {
+                return {
+                  id: qid,
+                  questionId: qid,
+                  imageUrl: tipData.imageUrl,
+                  answer: tipData.answer
+                }
+              }
+
               return null
             })
 
@@ -135,17 +152,6 @@ export default function TipDetailPage() {
           </div>
           <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">{tip.content}</p>
         </div>
-
-        {/* 画像 */}
-        {tip.imageUrl && (
-          <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-6">
-            <img
-              src={tip.imageUrl}
-              alt={tip.title}
-              className="max-w-full rounded-lg mx-auto"
-            />
-          </div>
-        )}
 
         {/* 関連問題 */}
         {questions.length > 0 && (

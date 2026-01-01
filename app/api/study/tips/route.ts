@@ -20,6 +20,8 @@ export type Tip = {
   keywords: string
   relatedQuestions: string
   imageUrl: string
+  answer: string
+  explanationSummary: string
 }
 
 export async function GET() {
@@ -28,7 +30,7 @@ export async function GET() {
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: STUDY_SPREADSHEET_ID,
-      range: '100の公式!A2:G200',
+      range: '100の公式!A2:I200',
     })
 
     const rows = response.data.values || []
@@ -43,6 +45,8 @@ export async function GET() {
         keywords: row[4] || '',
         relatedQuestions: row[5] || '',
         imageUrl: row[6] || '',
+        answer: row[7] || '',
+        explanationSummary: row[8] || '',
       }))
 
     return NextResponse.json(tips)
