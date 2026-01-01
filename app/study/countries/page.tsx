@@ -15,6 +15,7 @@ type Country = {
   climate: string
   keywords: string
   description: string
+  mapUrl: string
 }
 
 const REGIONS = [
@@ -33,7 +34,7 @@ export default function CountriesPage() {
   const [loading, setLoading] = useState(true)
   const [mode, setMode] = useState<'list' | 'memorize'>('list')
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [showAnswer, setShowAnswer] = useState(false)
+  const [step, setStep] = useState(0)  // 0: 地図, 1: 国名, 2: 人口, 3: 所得, 4: 気候, 5: キーワード
   const [selectedRegion, setSelectedRegion] = useState('全て')
   const [searchText, setSearchText] = useState('')
 
@@ -72,27 +73,33 @@ export default function CountriesPage() {
 
     setFilteredCountries(filtered)
     setCurrentIndex(0)
-    setShowAnswer(false)
+    setStep(0)
   }, [countries, selectedRegion, searchText])
 
   const shuffleCards = () => {
     const shuffled = [...filteredCountries].sort(() => Math.random() - 0.5)
     setFilteredCountries(shuffled)
     setCurrentIndex(0)
-    setShowAnswer(false)
+    setStep(0)
   }
 
   const nextCard = () => {
     if (currentIndex < filteredCountries.length - 1) {
       setCurrentIndex(currentIndex + 1)
-      setShowAnswer(false)
+      setStep(0)
     }
   }
 
   const prevCard = () => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1)
-      setShowAnswer(false)
+      setStep(0)
+    }
+  }
+
+  const nextStep = () => {
+    if (step < 5) {
+      setStep(step + 1)
     }
   }
 
@@ -117,7 +124,7 @@ export default function CountriesPage() {
             一覧モード
           </button>
           <button
-            onClick={() => { setMode('memorize'); setShowAnswer(false); }}
+            onClick={() => { setMode('memorize'); setStep(0); }}
             className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${
               mode === 'memorize'
                 ? 'bg-[#3ab5cd] text-white'
@@ -232,50 +239,86 @@ export default function CountriesPage() {
 
                 {/* カード */}
                 <div
-                  onClick={() => setShowAnswer(!showAnswer)}
-                  className="bg-white border-2 border-[#3ab5cd] rounded-xl p-8 min-h-[300px] cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={nextStep}
+                  className="bg-white border-2 border-[#3ab5cd] rounded-xl p-8 min-h-[400px] cursor-pointer hover:shadow-lg transition-shadow flex flex-col items-center justify-center"
                 >
-                  {!showAnswer ? (
-                    /* 表面: 国名のみ */
-                    <div className="flex flex-col items-center justify-center h-full">
-                      <Globe className="w-12 h-12 text-[#3ab5cd] mb-4" />
-                      <h2 className="text-3xl font-bold text-[#2b6ca3] mb-2">
-                        {currentCountry?.name}
-                      </h2>
-                      <p className="text-gray-500 text-sm">タップで詳細を表示</p>
+                  {step === 0 && (
+                    /* Step 0: 地図表示 */
+                    <div className="flex flex-col items-center justify-center h-full w-full">
+                      {currentCountry?.mapUrl ? (
+                        <img
+                          src={currentCountry.mapUrl}
+                          alt="国の位置"
+                          className="max-w-full max-h-[300px] rounded-lg mb-4"
+                        />
+                      ) : (
+                        <Globe className="w-24 h-24 text-[#3ab5cd] mb-4" />
+                      )}
+                      <p className="text-gray-500 text-sm">タップで国名を表示</p>
                     </div>
-                  ) : (
-                    /* 裏面: 詳細情報 */
-                    <div className="space-y-3">
-                      <h2 className="text-2xl font-bold text-[#2b6ca3] border-b pb-2">
+                  )}
+
+                  {step === 1 && (
+                    /* Step 1: 国名表示 */
+                    <div className="flex flex-col items-center justify-center h-full">
+                      <h2 className="text-4xl font-bold text-[#2b6ca3] mb-6">
                         {currentCountry?.name}
                       </h2>
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div>
-                          <span className="text-gray-700">地域:</span>
-                          <span className="ml-2 font-medium text-gray-900">{currentCountry?.region}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-700">気候:</span>
-                          <span className="ml-2 font-medium text-gray-900">{currentCountry?.climate}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-700">GDP:</span>
-                          <span className="ml-2 font-medium text-gray-900">
-                            {currentCountry?.gdpLevel} ({currentCountry?.gdpEstimate}ドル)
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-gray-700">人口:</span>
-                          <span className="ml-2 font-medium text-gray-900">
-                            {currentCountry?.populationLevel} ({currentCountry?.populationEstimate}万人)
-                          </span>
-                        </div>
+                      <p className="text-gray-500 text-sm">タップで次へ</p>
+                    </div>
+                  )}
+
+                  {step === 2 && (
+                    /* Step 2: 人口規模 */
+                    <div className="flex flex-col items-center justify-center h-full space-y-4">
+                      <p className="text-xl text-gray-700 mb-2">人口規模は？</p>
+                      <div className="text-center">
+                        <p className="text-3xl font-bold text-[#2b6ca3] mb-2">
+                          {currentCountry?.populationLevel}
+                        </p>
+                        <p className="text-xl text-gray-600">
+                          ({currentCountry?.populationEstimate}万人)
+                        </p>
                       </div>
-                      <div>
-                        <span className="text-gray-700 text-sm">キーワード:</span>
-                        <p className="font-medium text-gray-900">{currentCountry?.keywords}</p>
+                      <p className="text-gray-500 text-sm mt-4">タップで次へ</p>
+                    </div>
+                  )}
+
+                  {step === 3 && (
+                    /* Step 3: 所得レベル */
+                    <div className="flex flex-col items-center justify-center h-full space-y-4">
+                      <p className="text-xl text-gray-700 mb-2">所得レベルは？</p>
+                      <div className="text-center">
+                        <p className="text-3xl font-bold text-[#2b6ca3] mb-2">
+                          {currentCountry?.gdpLevel}
+                        </p>
+                        <p className="text-xl text-gray-600">
+                          ({currentCountry?.gdpEstimate}ドル)
+                        </p>
                       </div>
+                      <p className="text-gray-500 text-sm mt-4">タップで次へ</p>
+                    </div>
+                  )}
+
+                  {step === 4 && (
+                    /* Step 4: 気候 */
+                    <div className="flex flex-col items-center justify-center h-full space-y-4">
+                      <p className="text-xl text-gray-700 mb-2">気候は？</p>
+                      <p className="text-3xl font-bold text-[#2b6ca3]">
+                        {currentCountry?.climate}
+                      </p>
+                      <p className="text-gray-500 text-sm mt-4">タップで次へ</p>
+                    </div>
+                  )}
+
+                  {step === 5 && (
+                    /* Step 5: キーワード */
+                    <div className="flex flex-col items-center justify-center h-full space-y-4">
+                      <p className="text-xl text-gray-700 mb-2">キーワードは？</p>
+                      <p className="text-2xl font-bold text-[#2b6ca3] text-center px-4">
+                        {currentCountry?.keywords}
+                      </p>
+                      <p className="text-gray-500 text-sm mt-4">次のカードへ進んでください</p>
                     </div>
                   )}
                 </div>

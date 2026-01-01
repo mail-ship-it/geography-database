@@ -23,6 +23,7 @@ export type Country = {
   climate: string
   keywords: string
   description: string
+  mapUrl: string
 }
 
 export async function GET() {
@@ -32,13 +33,13 @@ export async function GET() {
     // Bランク76カ国を取得
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: STUDY_SPREADSHEET_ID,
-      range: 'Bランク76カ国!A2:J100',
+      range: 'Bランク76カ国!A2:K100',
     })
 
     const rows = response.data.values || []
 
     // Bランクデータをマッピング
-    // 列構成: id, 国名, 地域, 所得レベル, 1人あたりGDP, 人口レベル, 人口, 気候, キーワード, 関連問題
+    // 列構成: id, 国名, 地域, 所得レベル, 1人あたりGDP, 人口レベル, 人口, 気候, キーワード, 関連問題, 地図URL
     const countries: Country[] = rows.map(row => ({
       id: row[0] || '',
       name: row[1] || '',
@@ -50,6 +51,7 @@ export async function GET() {
       climate: row[7] || '',
       keywords: row[8] || '',
       description: '',  // description列なし（空文字列）
+      mapUrl: row[10] || '',  // K列: 地図URL
     }))
 
     return NextResponse.json(countries)
