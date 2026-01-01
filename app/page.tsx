@@ -84,11 +84,11 @@ export default function Home() {
                   <div className="bg-[#e63278]/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:bg-[#e63278]/20 transition-colors">
                     <Shuffle className="w-10 h-10 text-[#e63278]" />
                   </div>
-                  <h3 className="text-2xl font-bold text-[#2b6ca3] mb-4">
+                  <h3 className="text-2xl font-bold text-[#2b6ca3] mb-4 whitespace-nowrap">
                     ランダム演習
                   </h3>
                   <p className="text-gray-600 mb-6 leading-relaxed flex-1">
-                    ランダムに出題される問題を解いて実力を確認できます
+                    ランダムに出題される問題を解いて<br />実力を確認できます
                   </p>
                   <div className="space-y-2 text-sm text-gray-500">
                     <div className="flex items-center justify-center">
@@ -114,16 +114,16 @@ export default function Home() {
                   <div className="bg-[#feec00]/30 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:bg-[#feec00]/50 transition-colors">
                     <BookOpen className="w-10 h-10 text-[#2b6ca3]" />
                   </div>
-                  <h3 className="text-2xl font-bold text-[#2b6ca3] mb-4">
+                  <h3 className="text-2xl font-bold text-[#2b6ca3] mb-4 whitespace-nowrap">
                     80点インプット
                   </h3>
                   <p className="text-gray-600 mb-6 leading-relaxed flex-1">
-                    頻出72カ国と100のコツで80点突破の基礎を固めます
+                    頻出76カ国と100のコツで<br />80点突破の基礎を固めます
                   </p>
                   <div className="space-y-2 text-sm text-gray-500">
                     <div className="flex items-center justify-center">
                       <BookOpen className="w-4 h-4 mr-2" />
-                      頻出72カ国
+                      頻出76カ国
                     </div>
                     <div className="flex items-center justify-center">
                       <FileText className="w-4 h-4 mr-2" />
