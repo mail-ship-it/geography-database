@@ -32,17 +32,6 @@ export default function TipDetailPage() {
   const [showAnswers, setShowAnswers] = useState<Record<string, boolean>>({})
   const [loading, setLoading] = useState(true)
 
-  // 問題IDから年度と試験種別をパース（例: "2019_本試験_2" → {year: "2019", examType: "honshiken", number: "2"}）
-  const parseQuestionId = (qid: string) => {
-    const match = qid.match(/^(\d{4})_(本試験|追試験)_(\d+)$/)
-    if (!match) return null
-    return {
-      year: match[1],
-      examType: match[2] === '本試験' ? 'honshiken' : 'tsuishiken',
-      questionId: qid
-    }
-  }
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -52,38 +41,33 @@ export default function TipDetailPage() {
           const tipData = await tipResponse.json()
           setTip(tipData)
 
-          // 関連問題がある場合、問題データを取得
+          // 関連問題がある場合、tipのG列、H列を使用
           if (tipData.relatedQuestions) {
             const questionIds = tipData.relatedQuestions.split(',').map((q: string) => q.trim())
-            const questionPromises = questionIds.map(async (qid: string, index: number) => {
-              const parsed = parseQuestionId(qid)
 
-              // 地理Bシートから取得を試みる
-              if (parsed) {
-                const qResponse = await fetch(`/api/questions?year=${parsed.year}&examType=${parsed.examType}`)
-                if (qResponse.ok) {
-                  const allQuestions = await qResponse.json()
-                  const found = allQuestions.find((q: Question) => q.questionId === qid)
-                  if (found) return found
+            // 最初の問題のみG列の画像とH列の解答を使用
+            if (questionIds.length > 0) {
+              const questions = questionIds.map((qid: string, index: number) => {
+                if (index === 0) {
+                  // 最初の問題: tipのG列（imageUrl）とH列（answer）を使用
+                  return {
+                    id: qid,
+                    questionId: qid,
+                    imageUrl: tipData.imageUrl || '',
+                    answer: tipData.answer || ''
+                  }
+                } else {
+                  // 2番目以降: 問題IDのみ表示（画像・解答なし）
+                  return {
+                    id: qid,
+                    questionId: qid,
+                    imageUrl: '',
+                    answer: ''
+                  }
                 }
-              }
-
-              // 地理Bシートから取得できない場合、tipのデータを使用
-              // 最初の関連問題の場合のみ、G列の画像とH列の解答を使用
-              if (index === 0) {
-                return {
-                  id: qid,
-                  questionId: qid,
-                  imageUrl: tipData.imageUrl,
-                  answer: tipData.answer
-                }
-              }
-
-              return null
-            })
-
-            const fetchedQuestions = await Promise.all(questionPromises)
-            setQuestions(fetchedQuestions.filter(q => q !== null))
+              })
+              setQuestions(questions)
+            }
           }
         }
       } catch (error) {
@@ -153,20 +137,9 @@ export default function TipDetailPage() {
           <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">{tip.content}</p>
         </div>
 
-        {/* 解説 */}
-        {tip.explanationSummary && (
-          <div className="bg-[#3ab5cd]/5 border border-[#3ab5cd]/30 rounded-lg p-6 mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-lg">💡</span>
-              <h2 className="font-bold text-gray-900">解説</h2>
-            </div>
-            <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">{tip.explanationSummary}</p>
-          </div>
-        )}
-
         {/* 関連問題 */}
         {questions.length > 0 && (
-          <div className="space-y-4">
+          <div className="space-y-4 mb-6">
             <h2 className="font-bold text-gray-900 text-lg flex items-center gap-2">
               <span className="text-lg">📝</span>
               関連問題
@@ -222,6 +195,17 @@ export default function TipDetailPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* 解説 */}
+        {tip.explanationSummary && (
+          <div className="bg-[#3ab5cd]/5 border border-[#3ab5cd]/30 rounded-lg p-6 mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-lg">💡</span>
+              <h2 className="font-bold text-gray-900">解説</h2>
+            </div>
+            <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">{tip.explanationSummary}</p>
           </div>
         )}
       </div>
