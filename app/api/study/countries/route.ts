@@ -29,10 +29,10 @@ export async function GET() {
   try {
     const sheets = getGoogleSheetsClient()
 
-    // Bランク75カ国を取得（実際は76カ国）
+    // Bランク76カ国を取得
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: STUDY_SPREADSHEET_ID,
-      range: 'Bランク75カ国!A2:J100',
+      range: 'Bランク76カ国!A2:J100',
     })
 
     const rows = response.data.values || []
