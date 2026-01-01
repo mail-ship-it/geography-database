@@ -153,6 +153,17 @@ export default function TipDetailPage() {
           <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">{tip.content}</p>
         </div>
 
+        {/* 解説 */}
+        {tip.explanationSummary && (
+          <div className="bg-[#3ab5cd]/5 border border-[#3ab5cd]/30 rounded-lg p-6 mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-lg">💡</span>
+              <h2 className="font-bold text-gray-900">解説</h2>
+            </div>
+            <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">{tip.explanationSummary}</p>
+          </div>
+        )}
+
         {/* 関連問題 */}
         {questions.length > 0 && (
           <div className="space-y-4">
