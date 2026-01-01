@@ -22,18 +22,28 @@ export default function StudyLayout({
     setLoading(false)
   }, [])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // 環境変数からパスワードを取得（クライアントサイドなのでNEXT_PUBLIC_が必要）
-    const correctPassword = process.env.NEXT_PUBLIC_MEMBER_PASSWORD || 'password'
+    try {
+      const response = await fetch('/api/auth/check', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password }),
+      })
 
-    if (password === correctPassword) {
-      setIsAuthenticated(true)
-      sessionStorage.setItem('study_auth', 'true')
-      setError('')
-    } else {
-      setError('パスワードが正しくありません')
+      if (response.ok) {
+        setIsAuthenticated(true)
+        sessionStorage.setItem('study_auth', 'true')
+        setError('')
+      } else {
+        setError('パスワードが正しくありません')
+        setPassword('')
+      }
+    } catch (error) {
+      setError('エラーが発生しました')
       setPassword('')
     }
   }
