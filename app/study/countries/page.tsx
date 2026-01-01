@@ -192,12 +192,12 @@ export default function CountriesPage() {
                     }`}
                   >
                     <td className="px-4 py-3 font-medium text-[#2b6ca3]">{country.name}</td>
-                    <td className="px-4 py-3 text-gray-900">{country.region}</td>
+                    <td className="px-4 py-3 text-gray-900 whitespace-nowrap">{country.region}</td>
                     <td className="px-4 py-3 text-gray-900">
-                      {country.gdpLevel} ({country.gdpEstimate}ドル)
+                      {country.gdpLevel}<br />({country.gdpEstimate}ドル)
                     </td>
                     <td className="px-4 py-3 text-gray-900">
-                      {country.populationLevel} ({country.populationEstimate}万人)
+                      {country.populationLevel}<br />({country.populationEstimate}万人)
                     </td>
                     <td className="px-4 py-3 text-gray-900">{country.climate}</td>
                     <td className="px-4 py-3 text-gray-900 hidden md:table-cell">{country.keywords}</td>
@@ -243,7 +243,7 @@ export default function CountriesPage() {
                   className="bg-white border-2 border-[#3ab5cd] rounded-xl p-8 min-h-[400px] cursor-pointer hover:shadow-lg transition-shadow flex flex-col items-center justify-center"
                 >
                   {step === 0 && (
-                    /* Step 0: 地図表示 */
+                    /* Step 0: 地図表示 + 国名は？ */
                     <div className="flex flex-col items-center justify-center h-full w-full">
                       {currentCountry?.mapUrl ? (
                         <img
@@ -254,24 +254,23 @@ export default function CountriesPage() {
                       ) : (
                         <Globe className="w-24 h-24 text-[#3ab5cd] mb-4" />
                       )}
-                      <p className="text-gray-500 text-sm">タップで国名を表示</p>
+                      <p className="text-xl text-gray-700 mt-4">国名は？</p>
                     </div>
                   )}
 
                   {step === 1 && (
-                    /* Step 1: 国名表示 */
-                    <div className="flex flex-col items-center justify-center h-full">
-                      <h2 className="text-4xl font-bold text-[#2b6ca3] mb-6">
+                    /* Step 1: 国名表示 + 人口規模は？ */
+                    <div className="flex flex-col items-center justify-center h-full space-y-4">
+                      <h2 className="text-4xl font-bold text-[#2b6ca3]">
                         {currentCountry?.name}
                       </h2>
-                      <p className="text-gray-500 text-sm">タップで次へ</p>
+                      <p className="text-xl text-gray-700 mt-6">人口規模は？</p>
                     </div>
                   )}
 
                   {step === 2 && (
-                    /* Step 2: 人口規模 */
+                    /* Step 2: 人口規模表示 + 所得レベルは？ */
                     <div className="flex flex-col items-center justify-center h-full space-y-4">
-                      <p className="text-xl text-gray-700 mb-2">人口規模は？</p>
                       <div className="text-center">
                         <p className="text-3xl font-bold text-[#2b6ca3] mb-2">
                           {currentCountry?.populationLevel}
@@ -280,14 +279,13 @@ export default function CountriesPage() {
                           ({currentCountry?.populationEstimate}万人)
                         </p>
                       </div>
-                      <p className="text-gray-500 text-sm mt-4">タップで次へ</p>
+                      <p className="text-xl text-gray-700 mt-6">所得レベルは？</p>
                     </div>
                   )}
 
                   {step === 3 && (
-                    /* Step 3: 所得レベル */
+                    /* Step 3: 所得レベル表示 + 気候は？ */
                     <div className="flex flex-col items-center justify-center h-full space-y-4">
-                      <p className="text-xl text-gray-700 mb-2">所得レベルは？</p>
                       <div className="text-center">
                         <p className="text-3xl font-bold text-[#2b6ca3] mb-2">
                           {currentCountry?.gdpLevel}
@@ -296,29 +294,27 @@ export default function CountriesPage() {
                           ({currentCountry?.gdpEstimate}ドル)
                         </p>
                       </div>
-                      <p className="text-gray-500 text-sm mt-4">タップで次へ</p>
+                      <p className="text-xl text-gray-700 mt-6">気候は？</p>
                     </div>
                   )}
 
                   {step === 4 && (
-                    /* Step 4: 気候 */
+                    /* Step 4: 気候表示 + キーワードは？ */
                     <div className="flex flex-col items-center justify-center h-full space-y-4">
-                      <p className="text-xl text-gray-700 mb-2">気候は？</p>
                       <p className="text-3xl font-bold text-[#2b6ca3]">
                         {currentCountry?.climate}
                       </p>
-                      <p className="text-gray-500 text-sm mt-4">タップで次へ</p>
+                      <p className="text-xl text-gray-700 mt-6">キーワードは？</p>
                     </div>
                   )}
 
                   {step === 5 && (
-                    /* Step 5: キーワード */
+                    /* Step 5: キーワード表示 */
                     <div className="flex flex-col items-center justify-center h-full space-y-4">
-                      <p className="text-xl text-gray-700 mb-2">キーワードは？</p>
                       <p className="text-2xl font-bold text-[#2b6ca3] text-center px-4">
                         {currentCountry?.keywords}
                       </p>
-                      <p className="text-gray-500 text-sm mt-4">次のカードへ進んでください</p>
+                      <p className="text-gray-500 text-sm mt-6">次のカードへ進んでください</p>
                     </div>
                   )}
                 </div>
