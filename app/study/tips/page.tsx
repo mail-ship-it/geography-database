@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Lightbulb, Filter } from 'lucide-react'
+import { Lightbulb, Filter, ChevronRight } from 'lucide-react'
+import Link from 'next/link'
 import Header from '../../components/Header'
 
 type Tip = {
@@ -10,6 +11,8 @@ type Tip = {
   title: string
   content: string
   keywords: string
+  relatedQuestions: string
+  imageUrl: string
 }
 
 export default function TipsPage() {
@@ -105,34 +108,25 @@ export default function TipsPage() {
             <p className="text-sm text-gray-500 mt-2">100のコツは近日公開予定</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-2">
             {filteredTips.map((tip) => (
-              <div
+              <Link
                 key={tip.id}
-                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                href={`/study/tips/${tip.id}`}
+                className="block bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-[#3ab5cd] transition-all"
               >
-                <div className="flex items-start justify-between">
+                <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="bg-[#2b6ca3]/10 text-[#2b6ca3] px-2 py-1 rounded text-xs font-medium">
+                    <div className="flex items-center gap-3">
+                      <span className="bg-[#2b6ca3]/10 text-[#2b6ca3] px-3 py-1 rounded text-sm font-medium min-w-[100px] text-center">
                         {tip.category}
                       </span>
-                      <span className="text-gray-400 text-xs">#{tip.id}</span>
+                      <h3 className="font-medium text-gray-900">{tip.title}</h3>
                     </div>
-                    <h3 className="font-bold text-[#2b6ca3] mb-2">{tip.title}</h3>
-                    <p className="text-gray-700 text-sm">{tip.content}</p>
-                    {tip.keywords && (
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {tip.keywords.split(',').map((kw, i) => (
-                          <span key={i} className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs">
-                            {kw.trim()}
-                          </span>
-                        ))}
-                      </div>
-                    )}
                   </div>
+                  <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" />
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

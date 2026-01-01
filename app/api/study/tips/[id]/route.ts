@@ -22,9 +22,13 @@ export type Tip = {
   imageUrl: string
 }
 
-export async function GET() {
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
     const sheets = getGoogleSheetsClient()
+    const { id } = params
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: STUDY_SPREADSHEET_ID,
@@ -33,7 +37,7 @@ export async function GET() {
 
     const rows = response.data.values || []
 
-    const tips: Tip[] = rows
+    const tip = rows
       .filter(row => row[0])
       .map(row => ({
         id: row[0] || '',
@@ -44,10 +48,15 @@ export async function GET() {
         relatedQuestions: row[5] || '',
         imageUrl: row[6] || '',
       }))
+      .find(t => t.id === id)
 
-    return NextResponse.json(tips)
+    if (!tip) {
+      return NextResponse.json({ error: 'Tip not found' }, { status: 404 })
+    }
+
+    return NextResponse.json(tip)
   } catch (error) {
-    console.error('Tips API error:', error)
-    return NextResponse.json({ error: 'Failed to fetch tips' }, { status: 500 })
+    console.error('Tip API error:', error)
+    return NextResponse.json({ error: 'Failed to fetch tip' }, { status: 500 })
   }
 }
