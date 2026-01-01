@@ -185,11 +185,15 @@ export default function CountriesPage() {
                     }`}
                   >
                     <td className="px-4 py-3 font-medium text-[#2b6ca3]">{country.name}</td>
-                    <td className="px-4 py-3 text-gray-800">{country.region}</td>
-                    <td className="px-4 py-3 text-gray-800">{country.gdpLevel}</td>
-                    <td className="px-4 py-3 text-gray-800">{country.populationLevel}</td>
-                    <td className="px-4 py-3 text-gray-800">{country.climate}</td>
-                    <td className="px-4 py-3 text-gray-800 hidden md:table-cell">{country.keywords}</td>
+                    <td className="px-4 py-3 text-gray-900">{country.region}</td>
+                    <td className="px-4 py-3 text-gray-900">
+                      {country.gdpLevel} ({country.gdpEstimate}ドル)
+                    </td>
+                    <td className="px-4 py-3 text-gray-900">
+                      {country.populationLevel} ({country.populationEstimate}万人)
+                    </td>
+                    <td className="px-4 py-3 text-gray-900">{country.climate}</td>
+                    <td className="px-4 py-3 text-gray-900 hidden md:table-cell">{country.keywords}</td>
                   </tr>
                 ))}
               </tbody>
@@ -248,29 +252,29 @@ export default function CountriesPage() {
                       </h2>
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         <div>
-                          <span className="text-gray-500">地域:</span>
-                          <span className="ml-2 font-medium">{currentCountry?.region}</span>
+                          <span className="text-gray-700">地域:</span>
+                          <span className="ml-2 font-medium text-gray-900">{currentCountry?.region}</span>
                         </div>
                         <div>
-                          <span className="text-gray-500">気候:</span>
-                          <span className="ml-2 font-medium">{currentCountry?.climate}</span>
+                          <span className="text-gray-700">気候:</span>
+                          <span className="ml-2 font-medium text-gray-900">{currentCountry?.climate}</span>
                         </div>
                         <div>
-                          <span className="text-gray-500">GDP:</span>
-                          <span className="ml-2 font-medium">{currentCountry?.gdpLevel}</span>
+                          <span className="text-gray-700">GDP:</span>
+                          <span className="ml-2 font-medium text-gray-900">
+                            {currentCountry?.gdpLevel} ({currentCountry?.gdpEstimate}ドル)
+                          </span>
                         </div>
                         <div>
-                          <span className="text-gray-500">人口:</span>
-                          <span className="ml-2 font-medium">{currentCountry?.populationLevel}</span>
+                          <span className="text-gray-700">人口:</span>
+                          <span className="ml-2 font-medium text-gray-900">
+                            {currentCountry?.populationLevel} ({currentCountry?.populationEstimate}万人)
+                          </span>
                         </div>
                       </div>
                       <div>
-                        <span className="text-gray-500 text-sm">キーワード:</span>
-                        <p className="font-medium">{currentCountry?.keywords}</p>
-                      </div>
-                      <div className="bg-[#feec00]/20 p-3 rounded-lg">
-                        <span className="text-gray-500 text-sm">試験でのポイント:</span>
-                        <p className="font-medium text-[#2b6ca3]">{currentCountry?.description}</p>
+                        <span className="text-gray-700 text-sm">キーワード:</span>
+                        <p className="font-medium text-gray-900">{currentCountry?.keywords}</p>
                       </div>
                     </div>
                   )}
