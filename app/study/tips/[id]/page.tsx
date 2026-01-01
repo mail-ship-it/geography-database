@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import { Lightbulb, Tag, FileText } from 'lucide-react'
+import { Lightbulb, FileText, Eye, EyeOff } from 'lucide-react'
 import Header from '../../../components/Header'
 
 type Tip = {
@@ -15,26 +15,66 @@ type Tip = {
   imageUrl: string
 }
 
+type Question = {
+  id: string
+  questionId: string
+  imageUrl: string
+  answer: string
+}
+
 export default function TipDetailPage() {
   const params = useParams()
   const id = params.id as string
   const [tip, setTip] = useState<Tip | null>(null)
+  const [questions, setQuestions] = useState<Question[]>([])
+  const [showAnswers, setShowAnswers] = useState<Record<string, boolean>>({})
   const [loading, setLoading] = useState(true)
 
+  // 問題IDから年度と試験種別をパース（例: "2019_本試験_2" → {year: "2019", examType: "honshiken", number: "2"}）
+  const parseQuestionId = (qid: string) => {
+    const match = qid.match(/^(\d{4})_(本試験|追試験)_(\d+)$/)
+    if (!match) return null
+    return {
+      year: match[1],
+      examType: match[2] === '本試験' ? 'honshiken' : 'tsuishiken',
+      questionId: qid
+    }
+  }
+
   useEffect(() => {
-    const fetchTip = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(`/api/study/tips/${id}`)
-        if (response.ok) {
-          const data = await response.json()
-          setTip(data)
+        // Tipデータを取得
+        const tipResponse = await fetch(`/api/study/tips/${id}`)
+        if (tipResponse.ok) {
+          const tipData = await tipResponse.json()
+          setTip(tipData)
+
+          // 関連問題がある場合、問題データを取得
+          if (tipData.relatedQuestions) {
+            const questionIds = tipData.relatedQuestions.split(',').map((q: string) => q.trim())
+            const questionPromises = questionIds.map(async (qid: string) => {
+              const parsed = parseQuestionId(qid)
+              if (!parsed) return null
+
+              const qResponse = await fetch(`/api/questions?year=${parsed.year}&examType=${parsed.examType}`)
+              if (qResponse.ok) {
+                const allQuestions = await qResponse.json()
+                return allQuestions.find((q: Question) => q.questionId === qid)
+              }
+              return null
+            })
+
+            const fetchedQuestions = await Promise.all(questionPromises)
+            setQuestions(fetchedQuestions.filter(q => q !== null))
+          }
         }
       } catch (error) {
-        console.error('Error fetching tip:', error)
+        console.error('Error fetching data:', error)
       }
       setLoading(false)
     }
-    fetchTip()
+    fetchData()
   }, [id])
 
   if (loading) {
@@ -107,43 +147,64 @@ export default function TipDetailPage() {
           </div>
         )}
 
-        {/* キーワード */}
-        {tip.keywords && (
-          <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <Tag className="w-5 h-5 text-[#2b6ca3]" />
-              <h2 className="font-bold text-gray-900">キーワード</h2>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {tip.keywords.split(',').map((kw, i) => (
-                <span
-                  key={i}
-                  className="bg-[#3ab5cd]/10 text-[#2b6ca3] px-3 py-1.5 rounded-md text-sm font-medium"
-                >
-                  {kw.trim()}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* 関連問題 */}
-        {tip.relatedQuestions && (
-          <div className="bg-[#feec00]/20 border border-[#feec00]/50 rounded-lg p-6">
-            <h2 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+        {questions.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="font-bold text-gray-900 text-lg flex items-center gap-2">
               <span className="text-lg">📝</span>
               関連問題
             </h2>
-            <div className="flex flex-wrap gap-2">
-              {tip.relatedQuestions.split(',').map((q, i) => (
-                <span
-                  key={i}
-                  className="bg-white border border-gray-300 text-gray-900 px-3 py-1.5 rounded-md text-sm font-medium"
-                >
-                  {q.trim()}
-                </span>
-              ))}
-            </div>
+            {questions.map((question) => (
+              <div key={question.id} className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+                <div className="mb-4">
+                  <span className="text-sm font-medium text-gray-600">{question.questionId}</span>
+                </div>
+
+                {/* 問題画像 */}
+                {question.imageUrl && (
+                  <div className="mb-4">
+                    <img
+                      src={question.imageUrl}
+                      alt={question.questionId}
+                      className="max-w-full rounded-lg mx-auto"
+                    />
+                  </div>
+                )}
+
+                {/* 解答表示/非表示ボタン */}
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setShowAnswers(prev => ({
+                      ...prev,
+                      [question.id]: !prev[question.id]
+                    }))}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#2b6ca3] text-white rounded-lg hover:bg-[#3ab5cd] transition-colors"
+                  >
+                    {showAnswers[question.id] ? (
+                      <>
+                        <EyeOff className="w-4 h-4" />
+                        解答を隠す
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="w-4 h-4" />
+                        解答を表示
+                      </>
+                    )}
+                  </button>
+
+                  {/* 解答 */}
+                  {showAnswers[question.id] && question.answer && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-gray-700">正答:</span>
+                      <span className="bg-[#feec00]/30 text-gray-900 px-4 py-2 rounded-lg font-bold text-lg">
+                        {question.answer}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
