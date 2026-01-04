@@ -49,11 +49,6 @@ export default function TipDetailPage() {
               .map((q: string) => q.trim())
               .filter((q: string) => q.length > 0)  // 空文字列を除外
 
-            console.log('Tip ID:', tipData.id)
-            console.log('Image URL from API:', tipData.imageUrl)
-            console.log('Answer from API:', tipData.answer)
-            console.log('Question IDs:', questionIds)
-
             // 問題IDがある場合のみ処理
             if (questionIds.length > 0) {
               // 全ての問題にG列の画像とH列の解答を使用（1つのコツに対して画像は1つ）
@@ -63,7 +58,6 @@ export default function TipDetailPage() {
                 imageUrl: tipData.imageUrl || '',
                 answer: tipData.answer || ''
               }))
-              console.log('Questions array:', questions)
               setQuestions(questions)
             }
           }

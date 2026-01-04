@@ -12,6 +12,40 @@ function getGoogleSheetsClient() {
   return google.sheets({ version: 'v4', auth })
 }
 
+// Google Drive URL を画像表示可能な形式に変換
+function convertDriveUrlToDirectLink(driveUrl: string): string {
+  if (!driveUrl) return ''
+
+  // FILE_IDを抽出（様々な形式に対応）
+  let fileId = ''
+
+  // 形式1: https://drive.google.com/uc?export=view&id=FILE_ID
+  const ucMatch = driveUrl.match(/[?&]id=([a-zA-Z0-9-_]+)/)
+  if (ucMatch && ucMatch[1]) {
+    fileId = ucMatch[1]
+  }
+
+  // 形式2: https://drive.google.com/file/d/FILE_ID/view
+  if (!fileId) {
+    const fileMatch = driveUrl.match(/\/file\/d\/([a-zA-Z0-9-_]+)/)
+    if (fileMatch && fileMatch[1]) {
+      fileId = fileMatch[1]
+    }
+  }
+
+  // 形式3: 既にlh3.googleusercontent.com形式の場合はそのまま返す
+  if (!fileId && driveUrl.includes('lh3.googleusercontent.com')) {
+    return driveUrl
+  }
+
+  if (fileId) {
+    // Googleusercontent経由で画像を直接表示
+    return `https://lh3.googleusercontent.com/d/${fileId}`
+  }
+
+  return driveUrl
+}
+
 export type Tip = {
   id: string
   category: string
@@ -48,7 +82,7 @@ export async function GET(
         content: row[3] || '',
         keywords: row[4] || '',
         relatedQuestions: row[5] || '',
-        imageUrl: row[6] || '',
+        imageUrl: convertDriveUrlToDirectLink(row[6] || ''),
         answer: row[7] || '',
         explanationSummary: row[8] || '',
       }))
