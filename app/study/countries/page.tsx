@@ -71,7 +71,9 @@ export default function CountriesPage() {
       )
     }
 
-    setFilteredCountries(filtered)
+    // デフォルトでシャッフル
+    const shuffled = [...filtered].sort(() => Math.random() - 0.5)
+    setFilteredCountries(shuffled)
     setCurrentIndex(0)
     setStep(0)
   }, [countries, selectedRegion, searchText])
