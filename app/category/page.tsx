@@ -272,17 +272,17 @@ function CategoryPage() {
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 placeholder="問題ID、分野名、国名で検索"
-                className="w-full px-3 py-2 border border-[#e2e2e2] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3ab5cd]"
+                className="w-full px-3 py-2 border border-[#e2e2e2] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3ab5cd] text-gray-900 placeholder:text-gray-500"
               />
             </div>
 
             {/* 検索結果数 */}
             <div className="flex items-end">
               <div className="bg-gray-100 px-4 py-2 rounded-md w-full text-center">
-                <span className="text-lg font-semibold">
+                <span className="text-lg font-semibold text-gray-900">
                   {loading ? '読み込み中...' : `${filteredQuestions.length}件`}
                 </span>
-                <span className="text-sm text-gray-600 ml-1">の問題</span>
+                <span className="text-sm text-gray-700 ml-1">の問題</span>
               </div>
             </div>
           </div>
