@@ -61,7 +61,7 @@ export default function YearPage() {
                 <div className="bg-[#2b6ca3] text-white px-6 py-4">
                   <h2 className="text-2xl font-bold flex items-center">
                     <Calendar className="mr-2" />
-                    {year}年 共通テスト地理B
+                    {year}年
                   </h2>
                 </div>
                 

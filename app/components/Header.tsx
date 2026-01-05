@@ -11,7 +11,7 @@ type HeaderProps = {
 }
 
 export default function Header({
-  title = "共通テスト地理問題データベース",
+  title = "共通テスト地理 過去問データベース",
   subtitle,
   showBackLink = false,
   backHref = "/",
