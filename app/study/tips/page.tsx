@@ -173,6 +173,7 @@ export default function TipsPage() {
               const status = tipStatuses[tip.id]
               const statusOption = STATUS_OPTIONS.find(opt => opt.value === status) || STATUS_OPTIONS.find(opt => opt.value === 'none')
               const needsAuth = index >= 5 && !isAuthenticated
+              const showAuthOverlay = index === 5 && !isAuthenticated  // 6番目（index=5）のみにオーバーレイ表示
 
               return (
                 <div key={tip.id} className="relative">
@@ -215,8 +216,8 @@ export default function TipsPage() {
                   </div>
                   </Link>
 
-                  {/* 認証オーバーレイ */}
-                  {needsAuth && (
+                  {/* 認証オーバーレイ（6番目の項目のみ） */}
+                  {showAuthOverlay && (
                     <div className="absolute inset-0 flex items-center justify-center bg-white/95 rounded-lg">
                       <div className="max-w-sm w-full mx-4">
                         <div className="bg-white border-2 border-[#2b6ca3] rounded-lg shadow-lg p-4">
