@@ -233,7 +233,7 @@ export default function TipsPage() {
                           </p>
                           <p className="text-center text-xs mb-3">
                             <a
-                              href="https://note.com/chirijyuku/n/n0b0ccaee508c"
+                              href="https://note.com/chirijyuku/n/n005bd88be660"
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-[#2b6ca3] hover:text-[#3ab5cd] underline"
