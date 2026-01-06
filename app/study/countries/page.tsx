@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { Globe, List, Brain, ChevronLeft, ChevronRight, Shuffle, Filter } from 'lucide-react'
 import Header from '../../components/Header'
 
+type CountryStatus = 'learned' | 'pending' | 'review' | null
+
 type Country = {
   id: string
   name: string
@@ -28,6 +30,14 @@ const REGIONS = [
   'オセアニア',
 ]
 
+const STATUS_OPTIONS = [
+  { value: 'all', label: '全て' },
+  { value: 'learned', label: '覚えた', color: 'bg-green-100 text-green-800' },
+  { value: 'pending', label: '保留', color: 'bg-yellow-100 text-yellow-800' },
+  { value: 'review', label: '見直す', color: 'bg-red-100 text-red-800' },
+  { value: 'none', label: '未設定', color: 'bg-gray-100 text-gray-600' },
+]
+
 export default function CountriesPage() {
   const [countries, setCountries] = useState<Country[]>([])
   const [filteredCountries, setFilteredCountries] = useState<Country[]>([])
@@ -37,6 +47,8 @@ export default function CountriesPage() {
   const [step, setStep] = useState(0)  // 0: 地図, 1: 国名, 2: 人口, 3: 所得, 4: 気候, 5: キーワード
   const [selectedRegion, setSelectedRegion] = useState('全て')
   const [searchText, setSearchText] = useState('')
+  const [countryStatuses, setCountryStatuses] = useState<Record<string, CountryStatus>>({})
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState('all')
 
   useEffect(() => {
     const fetchCountries = async () => {
@@ -55,6 +67,18 @@ export default function CountriesPage() {
     fetchCountries()
   }, [])
 
+  // localStorageからステータスを読み込み
+  useEffect(() => {
+    const saved = localStorage.getItem('country_statuses')
+    if (saved) {
+      try {
+        setCountryStatuses(JSON.parse(saved))
+      } catch (error) {
+        console.error('Error loading country statuses:', error)
+      }
+    }
+  }, [])
+
   useEffect(() => {
     let filtered = countries
 
@@ -71,12 +95,23 @@ export default function CountriesPage() {
       )
     }
 
+    // ステータスフィルター
+    if (selectedStatusFilter !== 'all') {
+      filtered = filtered.filter(c => {
+        const status = countryStatuses[c.id]
+        if (selectedStatusFilter === 'none') {
+          return !status
+        }
+        return status === selectedStatusFilter
+      })
+    }
+
     // デフォルトでシャッフル
     const shuffled = [...filtered].sort(() => Math.random() - 0.5)
     setFilteredCountries(shuffled)
     setCurrentIndex(0)
     setStep(0)
-  }, [countries, selectedRegion, searchText])
+  }, [countries, selectedRegion, searchText, selectedStatusFilter, countryStatuses])
 
   const shuffleCards = () => {
     const shuffled = [...filteredCountries].sort(() => Math.random() - 0.5)
@@ -103,6 +138,12 @@ export default function CountriesPage() {
     if (step < 5) {
       setStep(step + 1)
     }
+  }
+
+  const setCountryStatus = (countryId: string, status: CountryStatus) => {
+    const updated = { ...countryStatuses, [countryId]: status }
+    setCountryStatuses(updated)
+    localStorage.setItem('country_statuses', JSON.stringify(updated))
   }
 
   const currentCountry = filteredCountries[currentIndex]
@@ -153,6 +194,15 @@ export default function CountriesPage() {
                 ))}
               </select>
             </div>
+            <select
+              value={selectedStatusFilter}
+              onChange={(e) => setSelectedStatusFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#3ab5cd]"
+            >
+              {STATUS_OPTIONS.map(option => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
             <input
               type="text"
               placeholder="国名・キーワードで検索"
@@ -178,6 +228,7 @@ export default function CountriesPage() {
               <thead>
                 <tr className="bg-[#2b6ca3] text-white">
                   <th className="px-4 py-3 text-left font-medium">国名</th>
+                  <th className="px-4 py-3 text-left font-medium">ステータス</th>
                   <th className="px-4 py-3 text-left font-medium">地域</th>
                   <th className="px-4 py-3 text-left font-medium">GDP</th>
                   <th className="px-4 py-3 text-left font-medium">人口</th>
@@ -186,25 +237,35 @@ export default function CountriesPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredCountries.map((country, index) => (
-                  <tr
-                    key={country.id}
-                    className={`border-b border-gray-200 hover:bg-[#3ab5cd]/10 ${
-                      index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                    }`}
-                  >
-                    <td className="px-4 py-3 font-medium text-[#2b6ca3]">{country.name}</td>
-                    <td className="px-4 py-3 text-gray-900 whitespace-nowrap">{country.region}</td>
-                    <td className="px-4 py-3 text-gray-900">
-                      {country.gdpLevel}<br />({country.gdpEstimate}ドル)
-                    </td>
-                    <td className="px-4 py-3 text-gray-900">
-                      {country.populationLevel}<br />({country.populationEstimate}万人)
-                    </td>
-                    <td className="px-4 py-3 text-gray-900">{country.climate}</td>
-                    <td className="px-4 py-3 text-gray-900 hidden md:table-cell">{country.keywords}</td>
-                  </tr>
-                ))}
+                {filteredCountries.map((country, index) => {
+                  const status = countryStatuses[country.id]
+                  const statusOption = STATUS_OPTIONS.find(opt => opt.value === status) || STATUS_OPTIONS.find(opt => opt.value === 'none')
+
+                  return (
+                    <tr
+                      key={country.id}
+                      className={`border-b border-gray-200 hover:bg-[#3ab5cd]/10 ${
+                        index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                      }`}
+                    >
+                      <td className="px-4 py-3 font-medium text-[#2b6ca3]">{country.name}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusOption?.color}`}>
+                          {statusOption?.label}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-gray-900 whitespace-nowrap">{country.region}</td>
+                      <td className="px-4 py-3 text-gray-900">
+                        {country.gdpLevel}<br />({country.gdpEstimate}ドル)
+                      </td>
+                      <td className="px-4 py-3 text-gray-900">
+                        {country.populationLevel}<br />({country.populationEstimate}万人)
+                      </td>
+                      <td className="px-4 py-3 text-gray-900">{country.climate}</td>
+                      <td className="px-4 py-3 text-gray-900 hidden md:table-cell">{country.keywords}</td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -326,6 +387,53 @@ export default function CountriesPage() {
                       <p className="text-2xl font-bold text-[#2b6ca3] text-center px-4">
                         {currentCountry?.keywords}
                       </p>
+
+                      {/* ステータス選択 */}
+                      <div className="mt-8 w-full max-w-md">
+                        <p className="text-sm text-gray-600 text-center mb-3">この国の学習ステータス：</p>
+                        <div className="flex gap-2 justify-center flex-wrap">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setCountryStatus(currentCountry.id, 'learned')
+                            }}
+                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                              countryStatuses[currentCountry.id] === 'learned'
+                                ? 'bg-green-500 text-white'
+                                : 'bg-green-100 text-green-800 hover:bg-green-200'
+                            }`}
+                          >
+                            覚えた
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setCountryStatus(currentCountry.id, 'pending')
+                            }}
+                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                              countryStatuses[currentCountry.id] === 'pending'
+                                ? 'bg-yellow-500 text-white'
+                                : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+                            }`}
+                          >
+                            保留
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setCountryStatus(currentCountry.id, 'review')
+                            }}
+                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                              countryStatuses[currentCountry.id] === 'review'
+                                ? 'bg-red-500 text-white'
+                                : 'bg-red-100 text-red-800 hover:bg-red-200'
+                            }`}
+                          >
+                            見直す
+                          </button>
+                        </div>
+                      </div>
+
                       <p className="text-gray-500 text-sm mt-6">次のカードへ進んでください</p>
                     </div>
                   )}
