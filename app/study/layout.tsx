@@ -69,8 +69,18 @@ export default function StudyLayout({
             <h1 className="text-2xl font-bold text-center text-[#2b6ca3] mb-2">
               80点インプット
             </h1>
-            <p className="text-center text-gray-600 mb-6">
-              このコンテンツは会員限定です
+            <p className="text-center text-gray-600 mb-2">
+              閲覧には有料登録が必要です。
+            </p>
+            <p className="text-center text-sm mb-6">
+              <a
+                href="https://note.com/chirijyuku/n/n0b0ccaee508c"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#2b6ca3] hover:text-[#3ab5cd] underline"
+              >
+                こちらから購入してください
+              </a>
             </p>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
