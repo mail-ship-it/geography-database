@@ -218,9 +218,9 @@ export default function TipsPage() {
 
                   {/* 認証オーバーレイ（6番目の項目のみ） */}
                   {showAuthOverlay && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-white/95 rounded-lg p-3">
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/95 rounded-lg p-3 z-10 pointer-events-auto">
                       <div className="w-full max-w-xs">
-                        <div className="bg-white border-2 border-[#2b6ca3] rounded-lg shadow-lg p-4 space-y-3">
+                        <div className="bg-white border-2 border-[#2b6ca3] rounded-lg shadow-lg p-4 space-y-3 pointer-events-auto">
                           <div className="flex justify-center">
                             <div className="bg-[#2b6ca3]/10 p-2 rounded-full">
                               <Lock className="w-5 h-5 text-[#2b6ca3]" />

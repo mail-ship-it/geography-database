@@ -536,9 +536,9 @@ export default function CountriesPage() {
 
                   {/* 認証オーバーレイ */}
                   {needsAuth && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-white/90 rounded-xl p-4">
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/90 rounded-xl p-4 z-10 pointer-events-auto">
                       <div className="w-full max-w-sm">
-                        <div className="bg-white border-2 border-[#2b6ca3] rounded-lg shadow-lg p-5 space-y-3">
+                        <div className="bg-white border-2 border-[#2b6ca3] rounded-lg shadow-lg p-5 space-y-3 pointer-events-auto">
                           <div className="flex justify-center">
                             <div className="bg-[#2b6ca3]/10 p-3 rounded-full">
                               <Lock className="w-6 h-6 text-[#2b6ca3]" />
