@@ -218,21 +218,21 @@ export default function TipsPage() {
 
                   {/* 認証オーバーレイ（6番目の項目のみ） */}
                   {showAuthOverlay && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-white/95 rounded-lg">
-                      <div className="max-w-sm w-full mx-4">
-                        <div className="bg-white border-2 border-[#2b6ca3] rounded-lg shadow-lg p-4">
-                          <div className="flex justify-center mb-3">
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/95 rounded-lg p-3">
+                      <div className="w-full max-w-xs">
+                        <div className="bg-white border-2 border-[#2b6ca3] rounded-lg shadow-lg p-4 space-y-3">
+                          <div className="flex justify-center">
                             <div className="bg-[#2b6ca3]/10 p-2 rounded-full">
                               <Lock className="w-5 h-5 text-[#2b6ca3]" />
                             </div>
                           </div>
-                          <h3 className="text-lg font-bold text-center text-[#2b6ca3] mb-1">
+                          <h3 className="text-base font-bold text-center text-[#2b6ca3]">
                             会員限定コンテンツ
                           </h3>
-                          <p className="text-center text-xs text-gray-600 mb-3">
-                            6項目目以降は会員登録が必要です
+                          <p className="text-center text-sm text-gray-700">
+                            有料会員登録が必要です。
                           </p>
-                          <p className="text-center text-xs mb-3">
+                          <p className="text-center text-xs">
                             <a
                               href="https://note.com/chirijyuku/n/n005bd88be660"
                               target="_blank"
@@ -242,20 +242,20 @@ export default function TipsPage() {
                               こちらから購入
                             </a>
                           </p>
-                          <form onSubmit={handleAuth}>
+                          <form onSubmit={handleAuth} className="space-y-2">
                             <input
                               type="password"
                               value={password}
                               onChange={(e) => setPassword(e.target.value)}
-                              className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2b6ca3] mb-2"
+                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2b6ca3]"
                               placeholder="パスワードを入力"
                             />
                             {authError && (
-                              <p className="text-red-500 text-xs mb-2">{authError}</p>
+                              <p className="text-red-500 text-xs text-center">{authError}</p>
                             )}
                             <button
                               type="submit"
-                              className="w-full bg-[#2b6ca3] text-white py-1.5 rounded-lg hover:bg-[#3ab5cd] transition-colors text-sm font-medium"
+                              className="w-full bg-[#2b6ca3] text-white py-2 rounded-lg hover:bg-[#3ab5cd] transition-colors text-sm font-medium"
                             >
                               ログイン
                             </button>
