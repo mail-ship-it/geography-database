@@ -132,13 +132,6 @@ export default function TipsPage() {
         ) : (
           <div className="space-y-2">
             {filteredTips.map((tip) => {
-              // 分野名の処理
-              const categoryLength = tip.category.length
-              const hasSlash = tip.category.includes('/')
-              // 7文字以上、または特定の分野は小さく
-              const isSmallText = categoryLength >= 7 || tip.category.includes('資源')
-              const categoryParts = tip.category.split('/')
-
               // ステータス取得
               const status = tipStatuses[tip.id]
               const statusOption = STATUS_OPTIONS.find(opt => opt.value === status) || STATUS_OPTIONS.find(opt => opt.value === 'none')
@@ -151,25 +144,16 @@ export default function TipsPage() {
                 >
                   {/* スマホ: 2段構成 */}
                   <div className="md:hidden">
-                    <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-2">
                       {/* 分野名 */}
-                      <span className={`bg-[#2b6ca3]/10 text-[#2b6ca3] px-2 py-1 rounded font-medium w-24 text-center flex-shrink-0 leading-tight ${isSmallText ? 'text-[10px]' : 'text-xs'}`}>
-                        {hasSlash ? (
-                          categoryParts.map((part, index) => (
-                            <span key={index}>
-                              {part}
-                              {index < categoryParts.length - 1 && <br />}
-                            </span>
-                          ))
-                        ) : (
-                          tip.category
-                        )}
+                      <span className="bg-[#2b6ca3]/10 text-[#2b6ca3] px-2 py-1 rounded font-medium text-xs text-center flex-shrink-0 leading-tight whitespace-nowrap">
+                        {tip.category}
                       </span>
                       {/* ステータス */}
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusOption?.color} flex-shrink-0`}>
                         {statusOption?.label}
                       </span>
-                      <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                      <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0 ml-auto" />
                     </div>
                     {/* タイトル */}
                     <h3 className="font-medium text-gray-900 text-sm">{tip.title}</h3>
