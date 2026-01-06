@@ -223,52 +223,99 @@ export default function CountriesPage() {
           </div>
         ) : mode === 'list' ? (
           /* 一覧モード */
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-sm">
-              <thead>
-                <tr className="bg-[#2b6ca3] text-white">
-                  <th className="px-3 py-2 text-left font-medium text-sm">国名</th>
-                  <th className="px-3 py-2 text-left font-medium text-sm">ステータス</th>
-                  <th className="px-3 py-2 text-left font-medium text-sm">地域</th>
-                  <th className="px-3 py-2 text-left font-medium text-sm">GDP</th>
-                  <th className="px-3 py-2 text-left font-medium text-sm">人口</th>
-                  <th className="px-3 py-2 text-left font-medium text-sm">気候</th>
-                  <th className="px-3 py-2 text-left font-medium text-sm hidden md:table-cell">キーワード</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredCountries.map((country, index) => {
-                  const status = countryStatuses[country.id]
-                  const statusOption = STATUS_OPTIONS.find(opt => opt.value === status) || STATUS_OPTIONS.find(opt => opt.value === 'none')
+          <>
+            {/* スマホ: カード形式 */}
+            <div className="md:hidden space-y-3">
+              {filteredCountries.map((country) => {
+                const status = countryStatuses[country.id]
+                const statusOption = STATUS_OPTIONS.find(opt => opt.value === status) || STATUS_OPTIONS.find(opt => opt.value === 'none')
 
-                  return (
-                    <tr
-                      key={country.id}
-                      className={`border-b border-gray-200 hover:bg-[#3ab5cd]/10 ${
-                        index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                      }`}
-                    >
-                      <td className="px-3 py-2 font-medium text-[#2b6ca3]">{country.name}</td>
-                      <td className="px-3 py-2">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusOption?.color}`}>
-                          {statusOption?.label}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2 text-gray-900 whitespace-nowrap">{country.region}</td>
-                      <td className="px-3 py-2 text-gray-900">
-                        {country.gdpLevel}<br />({country.gdpEstimate}ドル)
-                      </td>
-                      <td className="px-3 py-2 text-gray-900">
-                        {country.populationLevel}<br />({country.populationEstimate}万人)
-                      </td>
-                      <td className="px-3 py-2 text-gray-900">{country.climate}</td>
-                      <td className="px-3 py-2 text-gray-900 hidden md:table-cell">{country.keywords}</td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+                return (
+                  <div
+                    key={country.id}
+                    className="bg-white border border-gray-200 rounded-lg p-4"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <h3 className="font-bold text-[#2b6ca3] text-lg">{country.name}</h3>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusOption?.color} ml-2 flex-shrink-0`}>
+                        {statusOption?.label}
+                      </span>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex">
+                        <span className="text-gray-500 w-16 flex-shrink-0">地域:</span>
+                        <span className="text-gray-900">{country.region}</span>
+                      </div>
+                      <div className="flex">
+                        <span className="text-gray-500 w-16 flex-shrink-0">GDP:</span>
+                        <span className="text-gray-900">{country.gdpLevel} ({country.gdpEstimate}ドル)</span>
+                      </div>
+                      <div className="flex">
+                        <span className="text-gray-500 w-16 flex-shrink-0">人口:</span>
+                        <span className="text-gray-900">{country.populationLevel} ({country.populationEstimate}万人)</span>
+                      </div>
+                      <div className="flex">
+                        <span className="text-gray-500 w-16 flex-shrink-0">気候:</span>
+                        <span className="text-gray-900">{country.climate}</span>
+                      </div>
+                      <div className="flex">
+                        <span className="text-gray-500 w-16 flex-shrink-0">特徴:</span>
+                        <span className="text-gray-900">{country.keywords}</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* タブレット以上: テーブル形式 */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full border-collapse text-sm">
+                <thead>
+                  <tr className="bg-[#2b6ca3] text-white">
+                    <th className="px-3 py-2 text-left font-medium text-sm">国名</th>
+                    <th className="px-3 py-2 text-left font-medium text-sm">ステータス</th>
+                    <th className="px-3 py-2 text-left font-medium text-sm">地域</th>
+                    <th className="px-3 py-2 text-left font-medium text-sm">GDP</th>
+                    <th className="px-3 py-2 text-left font-medium text-sm">人口</th>
+                    <th className="px-3 py-2 text-left font-medium text-sm">気候</th>
+                    <th className="px-3 py-2 text-left font-medium text-sm">キーワード</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredCountries.map((country, index) => {
+                    const status = countryStatuses[country.id]
+                    const statusOption = STATUS_OPTIONS.find(opt => opt.value === status) || STATUS_OPTIONS.find(opt => opt.value === 'none')
+
+                    return (
+                      <tr
+                        key={country.id}
+                        className={`border-b border-gray-200 hover:bg-[#3ab5cd]/10 ${
+                          index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                        }`}
+                      >
+                        <td className="px-3 py-2 font-medium text-[#2b6ca3]">{country.name}</td>
+                        <td className="px-3 py-2">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusOption?.color}`}>
+                            {statusOption?.label}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-gray-900 whitespace-nowrap">{country.region}</td>
+                        <td className="px-3 py-2 text-gray-900">
+                          {country.gdpLevel}<br />({country.gdpEstimate}ドル)
+                        </td>
+                        <td className="px-3 py-2 text-gray-900">
+                          {country.populationLevel}<br />({country.populationEstimate}万人)
+                        </td>
+                        <td className="px-3 py-2 text-gray-900">{country.climate}</td>
+                        <td className="px-3 py-2 text-gray-900">{country.keywords}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         ) : (
           /* 暗記モード */
           <div className="max-w-2xl mx-auto">
