@@ -41,6 +41,7 @@ const STATUS_OPTIONS = [
 export default function CountriesPage() {
   const [countries, setCountries] = useState<Country[]>([])
   const [filteredCountries, setFilteredCountries] = useState<Country[]>([])
+  const [shuffledCountries, setShuffledCountries] = useState<Country[]>([])
   const [loading, setLoading] = useState(true)
   const [mode, setMode] = useState<'list' | 'memorize'>('memorize')
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -106,22 +107,25 @@ export default function CountriesPage() {
       })
     }
 
-    // デフォルトでシャッフル
+    // 一覧モード用：元の順番を保持
+    setFilteredCountries(filtered)
+
+    // 暗記モード用：シャッフル
     const shuffled = [...filtered].sort(() => Math.random() - 0.5)
-    setFilteredCountries(shuffled)
+    setShuffledCountries(shuffled)
     setCurrentIndex(0)
     setStep(0)
   }, [countries, selectedRegion, searchText, selectedStatusFilter, countryStatuses])
 
   const shuffleCards = () => {
-    const shuffled = [...filteredCountries].sort(() => Math.random() - 0.5)
-    setFilteredCountries(shuffled)
+    const shuffled = [...shuffledCountries].sort(() => Math.random() - 0.5)
+    setShuffledCountries(shuffled)
     setCurrentIndex(0)
     setStep(0)
   }
 
   const nextCard = () => {
-    if (currentIndex < filteredCountries.length - 1) {
+    if (currentIndex < shuffledCountries.length - 1) {
       setCurrentIndex(currentIndex + 1)
       setStep(0)
     }
@@ -146,7 +150,7 @@ export default function CountriesPage() {
     localStorage.setItem('country_statuses', JSON.stringify(updated))
   }
 
-  const currentCountry = filteredCountries[currentIndex]
+  const currentCountry = shuffledCountries[currentIndex]
 
   return (
     <main className="min-h-screen bg-white">
@@ -319,7 +323,7 @@ export default function CountriesPage() {
         ) : (
           /* 暗記モード */
           <div className="max-w-2xl mx-auto">
-            {filteredCountries.length === 0 ? (
+            {shuffledCountries.length === 0 ? (
               <div className="text-center py-12 text-gray-600">
                 該当する国がありません
               </div>
@@ -328,7 +332,7 @@ export default function CountriesPage() {
                 {/* 進捗 */}
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-sm text-gray-600">
-                    {currentIndex + 1} / {filteredCountries.length}
+                    {currentIndex + 1} / {shuffledCountries.length}
                   </span>
                   <button
                     onClick={shuffleCards}
@@ -343,7 +347,7 @@ export default function CountriesPage() {
                 <div className="w-full bg-gray-200 rounded-full h-2 mb-6">
                   <div
                     className="bg-[#3ab5cd] h-2 rounded-full transition-all"
-                    style={{ width: `${((currentIndex + 1) / filteredCountries.length) * 100}%` }}
+                    style={{ width: `${((currentIndex + 1) / shuffledCountries.length) * 100}%` }}
                   />
                 </div>
 
@@ -502,9 +506,9 @@ export default function CountriesPage() {
                   </button>
                   <button
                     onClick={nextCard}
-                    disabled={currentIndex === filteredCountries.length - 1}
+                    disabled={currentIndex === shuffledCountries.length - 1}
                     className={`flex items-center px-4 py-2 rounded-lg ${
-                      currentIndex === filteredCountries.length - 1
+                      currentIndex === shuffledCountries.length - 1
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                         : 'bg-[#2b6ca3] text-white hover:bg-[#3ab5cd]'
                     }`}
