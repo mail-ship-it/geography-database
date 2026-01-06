@@ -116,11 +116,11 @@ export default function TipsPage() {
                 className="block bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-[#3ab5cd] transition-all"
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex-1 flex items-center gap-3">
-                    <span className="bg-[#2b6ca3]/10 text-[#2b6ca3] px-3 py-1 rounded text-sm font-medium w-40 text-center flex-shrink-0">
+                  <div className="flex-1 flex items-center gap-2 md:gap-3">
+                    <span className="bg-[#2b6ca3]/10 text-[#2b6ca3] px-2 md:px-3 py-1 rounded text-xs md:text-sm font-medium w-20 md:w-32 text-center flex-shrink-0">
                       {tip.category}
                     </span>
-                    <h3 className="font-medium text-gray-900">{tip.title}</h3>
+                    <h3 className="font-medium text-gray-900 text-sm md:text-base">{tip.title}</h3>
                   </div>
                   <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" />
                 </div>

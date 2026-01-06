@@ -224,16 +224,16 @@ export default function CountriesPage() {
         ) : mode === 'list' ? (
           /* 一覧モード */
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
+            <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="bg-[#2b6ca3] text-white">
-                  <th className="px-4 py-3 text-left font-medium">国名</th>
-                  <th className="px-4 py-3 text-left font-medium">ステータス</th>
-                  <th className="px-4 py-3 text-left font-medium">地域</th>
-                  <th className="px-4 py-3 text-left font-medium">GDP</th>
-                  <th className="px-4 py-3 text-left font-medium">人口</th>
-                  <th className="px-4 py-3 text-left font-medium">気候</th>
-                  <th className="px-4 py-3 text-left font-medium hidden md:table-cell">キーワード</th>
+                  <th className="px-3 py-2 text-left font-medium text-sm">国名</th>
+                  <th className="px-3 py-2 text-left font-medium text-sm">ステータス</th>
+                  <th className="px-3 py-2 text-left font-medium text-sm">地域</th>
+                  <th className="px-3 py-2 text-left font-medium text-sm">GDP</th>
+                  <th className="px-3 py-2 text-left font-medium text-sm">人口</th>
+                  <th className="px-3 py-2 text-left font-medium text-sm">気候</th>
+                  <th className="px-3 py-2 text-left font-medium text-sm hidden md:table-cell">キーワード</th>
                 </tr>
               </thead>
               <tbody>
@@ -248,21 +248,21 @@ export default function CountriesPage() {
                         index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
                       }`}
                     >
-                      <td className="px-4 py-3 font-medium text-[#2b6ca3]">{country.name}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 py-2 font-medium text-[#2b6ca3]">{country.name}</td>
+                      <td className="px-3 py-2">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusOption?.color}`}>
                           {statusOption?.label}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-gray-900 whitespace-nowrap">{country.region}</td>
-                      <td className="px-4 py-3 text-gray-900">
+                      <td className="px-3 py-2 text-gray-900 whitespace-nowrap">{country.region}</td>
+                      <td className="px-3 py-2 text-gray-900">
                         {country.gdpLevel}<br />({country.gdpEstimate}ドル)
                       </td>
-                      <td className="px-4 py-3 text-gray-900">
+                      <td className="px-3 py-2 text-gray-900">
                         {country.populationLevel}<br />({country.populationEstimate}万人)
                       </td>
-                      <td className="px-4 py-3 text-gray-900">{country.climate}</td>
-                      <td className="px-4 py-3 text-gray-900 hidden md:table-cell">{country.keywords}</td>
+                      <td className="px-3 py-2 text-gray-900">{country.climate}</td>
+                      <td className="px-3 py-2 text-gray-900 hidden md:table-cell">{country.keywords}</td>
                     </tr>
                   )
                 })}
