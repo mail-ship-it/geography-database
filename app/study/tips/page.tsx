@@ -110,9 +110,11 @@ export default function TipsPage() {
         ) : (
           <div className="space-y-2">
             {filteredTips.map((tip) => {
-              // 分野名の文字数をチェックして、長い場合は文字サイズを小さくする
+              // 分野名の処理
               const categoryLength = tip.category.length
-              const isLongCategory = categoryLength > 12
+              const hasSlash = tip.category.includes('/')
+              // 7文字以上、または特定の分野は小さく
+              const isSmallText = categoryLength >= 7 || tip.category.includes('資源')
               const categoryParts = tip.category.split('/')
 
               return (
@@ -123,14 +125,18 @@ export default function TipsPage() {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex-1 flex items-center gap-2 md:gap-3">
-                      {/* スマホ: 改行対応 */}
-                      <span className={`bg-[#2b6ca3]/10 text-[#2b6ca3] px-2 md:px-3 py-1 rounded font-medium w-24 md:w-32 text-center flex-shrink-0 leading-tight md:hidden ${isLongCategory ? 'text-[10px]' : 'text-xs'}`}>
-                        {categoryParts.map((part, index) => (
-                          <span key={index}>
-                            {part}
-                            {index < categoryParts.length - 1 && <br />}
-                          </span>
-                        ))}
+                      {/* スマホ: 改行対応（/がある場合のみ改行） */}
+                      <span className={`bg-[#2b6ca3]/10 text-[#2b6ca3] px-2 md:px-3 py-1 rounded font-medium w-24 md:w-32 text-center flex-shrink-0 leading-tight md:hidden ${isSmallText ? 'text-[10px]' : 'text-xs'}`}>
+                        {hasSlash ? (
+                          categoryParts.map((part, index) => (
+                            <span key={index}>
+                              {part}
+                              {index < categoryParts.length - 1 && <br />}
+                            </span>
+                          ))
+                        ) : (
+                          tip.category
+                        )}
                       </span>
                       {/* タブレット以上: 通常表示 */}
                       <span className="hidden md:inline-block bg-[#2b6ca3]/10 text-[#2b6ca3] px-3 py-1 rounded text-sm font-medium w-32 text-center flex-shrink-0">
