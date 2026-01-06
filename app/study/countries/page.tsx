@@ -86,9 +86,9 @@ export default function CountriesPage() {
     }
   }, [])
 
-  // 認証状態を確認
+  // 認証状態を確認（永続化）
   useEffect(() => {
-    const auth = sessionStorage.getItem('study_auth')
+    const auth = localStorage.getItem('study_auth')
     if (auth === 'true') {
       setIsAuthenticated(true)
     }
@@ -177,7 +177,7 @@ export default function CountriesPage() {
 
       if (response.ok) {
         setIsAuthenticated(true)
-        sessionStorage.setItem('study_auth', 'true')
+        localStorage.setItem('study_auth', 'true')
         setAuthError('')
         setPassword('')
       } else {
