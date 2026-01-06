@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Globe, List, Brain, ChevronLeft, ChevronRight, Shuffle, Filter } from 'lucide-react'
+import { Globe, List, Brain, ChevronLeft, ChevronRight, Shuffle, Filter, Lock } from 'lucide-react'
 import Header from '../../components/Header'
 
 type CountryStatus = 'learned' | 'pending' | 'review' | null
@@ -53,6 +53,9 @@ export default function CountriesPage() {
   const [searchText, setSearchText] = useState('')
   const [countryStatuses, setCountryStatuses] = useState<Record<string, CountryStatus>>({})
   const [selectedStatusFilter, setSelectedStatusFilter] = useState('all')
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [password, setPassword] = useState('')
+  const [authError, setAuthError] = useState('')
 
   useEffect(() => {
     const fetchCountries = async () => {
@@ -80,6 +83,14 @@ export default function CountriesPage() {
       } catch (error) {
         console.error('Error loading country statuses:', error)
       }
+    }
+  }, [])
+
+  // 認証状態を確認
+  useEffect(() => {
+    const auth = sessionStorage.getItem('study_auth')
+    if (auth === 'true') {
+      setIsAuthenticated(true)
     }
   }, [])
 
@@ -153,7 +164,34 @@ export default function CountriesPage() {
     localStorage.setItem('country_statuses', JSON.stringify(updated))
   }
 
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const response = await fetch('/api/auth/check', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password }),
+      })
+
+      if (response.ok) {
+        setIsAuthenticated(true)
+        sessionStorage.setItem('study_auth', 'true')
+        setAuthError('')
+        setPassword('')
+      } else {
+        setAuthError('パスワードが正しくありません')
+        setPassword('')
+      }
+    } catch (error) {
+      setAuthError('エラーが発生しました')
+      setPassword('')
+    }
+  }
+
   const currentCountry = shuffledCountries[currentIndex]
+  const needsAuth = mode === 'memorize' && currentIndex >= 1 && !isAuthenticated
 
   return (
     <main className="min-h-screen bg-white">
@@ -355,10 +393,13 @@ export default function CountriesPage() {
                 </div>
 
                 {/* カード */}
-                <div
-                  onClick={nextStep}
-                  className="bg-white border-2 border-[#3ab5cd] rounded-xl p-8 min-h-[400px] cursor-pointer hover:shadow-lg transition-shadow flex flex-col items-center justify-center"
-                >
+                <div className="relative">
+                  <div
+                    onClick={needsAuth ? undefined : nextStep}
+                    className={`bg-white border-2 border-[#3ab5cd] rounded-xl p-8 min-h-[400px] flex flex-col items-center justify-center ${
+                      needsAuth ? 'blur-md' : 'cursor-pointer hover:shadow-lg transition-shadow'
+                    }`}
+                  >
                   {step === 0 && (
                     /* Step 0: 地図表示 + 国名は？ */
                     <div className="flex flex-col items-center justify-center h-full w-full">
@@ -489,6 +530,56 @@ export default function CountriesPage() {
                       </div>
 
                       <p className="text-gray-500 text-sm mt-6">次のカードへ進んでください</p>
+                    </div>
+                  )}
+                  </div>
+
+                  {/* 認証オーバーレイ */}
+                  {needsAuth && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/90 rounded-xl">
+                      <div className="max-w-md w-full mx-4">
+                        <div className="bg-white border-2 border-[#2b6ca3] rounded-lg shadow-lg p-6">
+                          <div className="flex justify-center mb-4">
+                            <div className="bg-[#2b6ca3]/10 p-3 rounded-full">
+                              <Lock className="w-6 h-6 text-[#2b6ca3]" />
+                            </div>
+                          </div>
+                          <h3 className="text-xl font-bold text-center text-[#2b6ca3] mb-2">
+                            会員限定コンテンツ
+                          </h3>
+                          <p className="text-center text-sm text-gray-600 mb-4">
+                            2か国目以降は会員登録が必要です
+                          </p>
+                          <p className="text-center text-xs mb-4">
+                            <a
+                              href="https://note.com/chirijyuku/n/n0b0ccaee508c"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[#2b6ca3] hover:text-[#3ab5cd] underline"
+                            >
+                              こちらから購入
+                            </a>
+                          </p>
+                          <form onSubmit={handleAuth}>
+                            <input
+                              type="password"
+                              value={password}
+                              onChange={(e) => setPassword(e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2b6ca3] mb-3"
+                              placeholder="パスワードを入力"
+                            />
+                            {authError && (
+                              <p className="text-red-500 text-xs mb-2">{authError}</p>
+                            )}
+                            <button
+                              type="submit"
+                              className="w-full bg-[#2b6ca3] text-white py-2 rounded-lg hover:bg-[#3ab5cd] transition-colors text-sm font-medium"
+                            >
+                              ログイン
+                            </button>
+                          </form>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Lightbulb, Filter, ChevronRight } from 'lucide-react'
+import { Lightbulb, Filter, ChevronRight, Lock } from 'lucide-react'
 import Link from 'next/link'
 import Header from '../../components/Header'
 
@@ -32,6 +32,9 @@ export default function TipsPage() {
   const [selectedCategory, setSelectedCategory] = useState('全て')
   const [searchText, setSearchText] = useState('')
   const [tipStatuses, setTipStatuses] = useState<Record<string, TipStatus>>({})
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [password, setPassword] = useState('')
+  const [authError, setAuthError] = useState('')
 
   useEffect(() => {
     const fetchTips = async () => {
@@ -65,6 +68,14 @@ export default function TipsPage() {
     }
   }, [])
 
+  // 認証状態を確認
+  useEffect(() => {
+    const auth = sessionStorage.getItem('study_auth')
+    if (auth === 'true') {
+      setIsAuthenticated(true)
+    }
+  }, [])
+
   useEffect(() => {
     let filtered = tips
 
@@ -83,6 +94,32 @@ export default function TipsPage() {
 
     setFilteredTips(filtered)
   }, [tips, selectedCategory, searchText])
+
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const response = await fetch('/api/auth/check', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password }),
+      })
+
+      if (response.ok) {
+        setIsAuthenticated(true)
+        sessionStorage.setItem('study_auth', 'true')
+        setAuthError('')
+        setPassword('')
+      } else {
+        setAuthError('パスワードが正しくありません')
+        setPassword('')
+      }
+    } catch (error) {
+      setAuthError('エラーが発生しました')
+      setPassword('')
+    }
+  }
 
   return (
     <main className="min-h-screen bg-white">
@@ -131,17 +168,21 @@ export default function TipsPage() {
           </div>
         ) : (
           <div className="space-y-2">
-            {filteredTips.map((tip) => {
+            {filteredTips.map((tip, index) => {
               // ステータス取得
               const status = tipStatuses[tip.id]
               const statusOption = STATUS_OPTIONS.find(opt => opt.value === status) || STATUS_OPTIONS.find(opt => opt.value === 'none')
+              const needsAuth = index >= 5 && !isAuthenticated
 
               return (
-                <Link
-                  key={tip.id}
-                  href={`/study/tips/${tip.id}`}
-                  className="block bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-[#3ab5cd] transition-all"
-                >
+                <div key={tip.id} className="relative">
+                  <Link
+                    href={needsAuth ? '#' : `/study/tips/${tip.id}`}
+                    onClick={needsAuth ? (e) => e.preventDefault() : undefined}
+                    className={`block bg-white border border-gray-200 rounded-lg p-4 transition-all ${
+                      needsAuth ? 'blur-sm pointer-events-none' : 'hover:shadow-md hover:border-[#3ab5cd]'
+                    }`}
+                  >
                   {/* スマホ: 2段構成 */}
                   <div className="md:hidden">
                     <div className="flex items-center gap-2 mb-2">
@@ -172,7 +213,57 @@ export default function TipsPage() {
                     </div>
                     <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" />
                   </div>
-                </Link>
+                  </Link>
+
+                  {/* 認証オーバーレイ */}
+                  {needsAuth && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/95 rounded-lg">
+                      <div className="max-w-sm w-full mx-4">
+                        <div className="bg-white border-2 border-[#2b6ca3] rounded-lg shadow-lg p-4">
+                          <div className="flex justify-center mb-3">
+                            <div className="bg-[#2b6ca3]/10 p-2 rounded-full">
+                              <Lock className="w-5 h-5 text-[#2b6ca3]" />
+                            </div>
+                          </div>
+                          <h3 className="text-lg font-bold text-center text-[#2b6ca3] mb-1">
+                            会員限定コンテンツ
+                          </h3>
+                          <p className="text-center text-xs text-gray-600 mb-3">
+                            6項目目以降は会員登録が必要です
+                          </p>
+                          <p className="text-center text-xs mb-3">
+                            <a
+                              href="https://note.com/chirijyuku/n/n0b0ccaee508c"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[#2b6ca3] hover:text-[#3ab5cd] underline"
+                            >
+                              こちらから購入
+                            </a>
+                          </p>
+                          <form onSubmit={handleAuth}>
+                            <input
+                              type="password"
+                              value={password}
+                              onChange={(e) => setPassword(e.target.value)}
+                              className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2b6ca3] mb-2"
+                              placeholder="パスワードを入力"
+                            />
+                            {authError && (
+                              <p className="text-red-500 text-xs mb-2">{authError}</p>
+                            )}
+                            <button
+                              type="submit"
+                              className="w-full bg-[#2b6ca3] text-white py-1.5 rounded-lg hover:bg-[#3ab5cd] transition-colors text-sm font-medium"
+                            >
+                              ログイン
+                            </button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )
             })}
           </div>
