@@ -5,6 +5,8 @@ import { useParams } from 'next/navigation'
 import { Lightbulb, FileText, Eye, EyeOff } from 'lucide-react'
 import Header from '../../../components/Header'
 
+type TipStatus = 'learned' | 'pending' | 'review' | null
+
 type Tip = {
   id: string
   category: string
@@ -32,6 +34,7 @@ export default function TipDetailPage() {
   const [showAnswers, setShowAnswers] = useState<Record<string, boolean>>({})
   const [showExplanation, setShowExplanation] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [tipStatus, setTipStatus] = useState<TipStatus>(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,6 +72,27 @@ export default function TipDetailPage() {
     }
     fetchData()
   }, [id])
+
+  // localStorageからステータスを読み込み
+  useEffect(() => {
+    const saved = localStorage.getItem('tip_statuses')
+    if (saved) {
+      try {
+        const statuses = JSON.parse(saved)
+        setTipStatus(statuses[id] || null)
+      } catch (error) {
+        console.error('Error loading tip statuses:', error)
+      }
+    }
+  }, [id])
+
+  const updateTipStatus = (status: TipStatus) => {
+    setTipStatus(status)
+    const saved = localStorage.getItem('tip_statuses')
+    const statuses = saved ? JSON.parse(saved) : {}
+    statuses[id] = status
+    localStorage.setItem('tip_statuses', JSON.stringify(statuses))
+  }
 
   if (loading) {
     return (
@@ -127,6 +151,43 @@ export default function TipDetailPage() {
             <h2 className="font-bold text-gray-900">内容</h2>
           </div>
           <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">{tip.content}</p>
+        </div>
+
+        {/* 学習ステータス */}
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-6">
+          <h2 className="font-bold text-gray-900 mb-4">学習ステータス</h2>
+          <div className="flex gap-3 flex-wrap">
+            <button
+              onClick={() => updateTipStatus('learned')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                tipStatus === 'learned'
+                  ? 'bg-green-500 text-white'
+                  : 'bg-green-100 text-green-800 hover:bg-green-200'
+              }`}
+            >
+              覚えた
+            </button>
+            <button
+              onClick={() => updateTipStatus('pending')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                tipStatus === 'pending'
+                  ? 'bg-yellow-500 text-white'
+                  : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+              }`}
+            >
+              保留
+            </button>
+            <button
+              onClick={() => updateTipStatus('review')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                tipStatus === 'review'
+                  ? 'bg-red-500 text-white'
+                  : 'bg-red-100 text-red-800 hover:bg-red-200'
+              }`}
+            >
+              見直す
+            </button>
+          </div>
         </div>
 
         {/* 関連問題 */}

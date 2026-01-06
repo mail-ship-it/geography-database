@@ -5,6 +5,8 @@ import { Lightbulb, Filter, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import Header from '../../components/Header'
 
+type TipStatus = 'learned' | 'pending' | 'review' | null
+
 type Tip = {
   id: string
   category: string
@@ -15,6 +17,13 @@ type Tip = {
   imageUrl: string
 }
 
+const STATUS_OPTIONS = [
+  { value: 'learned', label: '覚えた', color: 'bg-green-100 text-green-800' },
+  { value: 'pending', label: '保留', color: 'bg-yellow-100 text-yellow-800' },
+  { value: 'review', label: '見直す', color: 'bg-red-100 text-red-800' },
+  { value: 'none', label: '未設定', color: 'bg-gray-100 text-gray-600' },
+]
+
 export default function TipsPage() {
   const [tips, setTips] = useState<Tip[]>([])
   const [filteredTips, setFilteredTips] = useState<Tip[]>([])
@@ -22,6 +31,7 @@ export default function TipsPage() {
   const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState('全て')
   const [searchText, setSearchText] = useState('')
+  const [tipStatuses, setTipStatuses] = useState<Record<string, TipStatus>>({})
 
   useEffect(() => {
     const fetchTips = async () => {
@@ -41,6 +51,18 @@ export default function TipsPage() {
       setLoading(false)
     }
     fetchTips()
+  }, [])
+
+  // localStorageからステータスを読み込み
+  useEffect(() => {
+    const saved = localStorage.getItem('tip_statuses')
+    if (saved) {
+      try {
+        setTipStatuses(JSON.parse(saved))
+      } catch (error) {
+        console.error('Error loading tip statuses:', error)
+      }
+    }
   }, [])
 
   useEffect(() => {
@@ -117,16 +139,21 @@ export default function TipsPage() {
               const isSmallText = categoryLength >= 7 || tip.category.includes('資源')
               const categoryParts = tip.category.split('/')
 
+              // ステータス取得
+              const status = tipStatuses[tip.id]
+              const statusOption = STATUS_OPTIONS.find(opt => opt.value === status) || STATUS_OPTIONS.find(opt => opt.value === 'none')
+
               return (
                 <Link
                   key={tip.id}
                   href={`/study/tips/${tip.id}`}
                   className="block bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-[#3ab5cd] transition-all"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 flex items-center gap-2 md:gap-3">
-                      {/* スマホ: 改行対応（/がある場合のみ改行） */}
-                      <span className={`bg-[#2b6ca3]/10 text-[#2b6ca3] px-2 md:px-3 py-1 rounded font-medium w-24 md:w-32 text-center flex-shrink-0 leading-tight md:hidden ${isSmallText ? 'text-[10px]' : 'text-xs'}`}>
+                  {/* スマホ: 2段構成 */}
+                  <div className="md:hidden">
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      {/* 分野名 */}
+                      <span className={`bg-[#2b6ca3]/10 text-[#2b6ca3] px-2 py-1 rounded font-medium w-24 text-center flex-shrink-0 leading-tight ${isSmallText ? 'text-[10px]' : 'text-xs'}`}>
                         {hasSlash ? (
                           categoryParts.map((part, index) => (
                             <span key={index}>
@@ -138,11 +165,26 @@ export default function TipsPage() {
                           tip.category
                         )}
                       </span>
-                      {/* タブレット以上: 通常表示 */}
-                      <span className="hidden md:inline-block bg-[#2b6ca3]/10 text-[#2b6ca3] px-3 py-1 rounded text-sm font-medium w-32 text-center flex-shrink-0">
+                      {/* ステータス */}
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusOption?.color} flex-shrink-0`}>
+                        {statusOption?.label}
+                      </span>
+                      <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                    </div>
+                    {/* タイトル */}
+                    <h3 className="font-medium text-gray-900 text-sm">{tip.title}</h3>
+                  </div>
+
+                  {/* タブレット以上: 従来通り */}
+                  <div className="hidden md:flex items-center justify-between">
+                    <div className="flex-1 flex items-center gap-3">
+                      <span className="bg-[#2b6ca3]/10 text-[#2b6ca3] px-3 py-1 rounded text-sm font-medium w-32 text-center flex-shrink-0">
                         {tip.category}
                       </span>
-                      <h3 className="font-medium text-gray-900 text-sm md:text-base">{tip.title}</h3>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusOption?.color}`}>
+                        {statusOption?.label}
+                      </span>
+                      <h3 className="font-medium text-gray-900 text-base">{tip.title}</h3>
                     </div>
                     <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" />
                   </div>
