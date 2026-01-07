@@ -16,20 +16,30 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "共通テスト地理データベース - 80点インプット",
-  description: "共通テスト地理B（2016-2025年）の過去問を年度別・分野別で学習できるWebアプリ。頻出76カ国の暗記カード、100のコツなど、効率的な学習をサポートします。",
-  keywords: ["共通テスト", "地理", "地理B", "過去問", "学習", "暗記", "データベース"],
+  description: "共通テスト地理（2016-2025年）の過去問を年度別・分野別で学習できるWebアプリ。頻出76カ国の暗記カード、100のコツなど、効率的な学習をサポートします。",
+  keywords: ["共通テスト", "地理", "過去問", "学習", "暗記", "データベース"],
+  metadataBase: new URL("https://geography-database.vercel.app"),
   openGraph: {
     title: "共通テスト地理データベース - 80点インプット",
-    description: "共通テスト地理Bの過去問10年分を効率的に学習できるWebアプリ",
+    description: "共通テスト地理の過去問10年分を効率的に学習できるWebアプリ",
     url: "https://geography-database.vercel.app",
     siteName: "共通テスト地理データベース",
     locale: "ja_JP",
     type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "共通テスト地理データベース - 80点インプット",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "共通テスト地理データベース - 80点インプット",
-    description: "共通テスト地理Bの過去問10年分を効率的に学習",
+    description: "共通テスト地理の過去問10年分を効率的に学習",
+    images: ["/og-image.png"],
   },
 };
 
