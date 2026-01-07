@@ -26,20 +26,11 @@ export const metadata: Metadata = {
     siteName: "共通テスト地理データベース",
     locale: "ja_JP",
     type: "website",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "共通テスト地理データベース - 80点インプット",
-      },
-    ],
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: "共通テスト地理データベース - 80点インプット",
     description: "共通テスト地理の過去問10年分を効率的に学習",
-    images: ["/og-image.png"],
   },
 };
 
