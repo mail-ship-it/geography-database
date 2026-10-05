@@ -1,0 +1,394 @@
+'use client'
+
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import { Layers, RotateCcw, Check, X, LogOut, ArrowLeftRight, AlertCircle } from 'lucide-react'
+import Header from '../components/Header'
+
+type StudyCard = {
+  id: string
+  subject: string
+  unit: string
+  front: string
+  back: string
+  box: number
+  due: string
+}
+
+type Result = { cardId: string; correct: boolean }
+
+const CODE_KEY = 'flashcard_code'
+const NEW_CARDS_PER_SESSION = 20
+const LEARNED_BOX = 3 // ボックス3以上（1週間後の復習に進んだ）を「定着」とみなす
+
+const todayJST = () => new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10)
+
+const shuffle = <T,>(items: T[]) => {
+  const a = [...items]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+
+const isDue = (c: StudyCard, today: string) => c.box > 0 && c.due <= today
+
+export default function FlashcardsPage() {
+  const [code, setCode] = useState('')
+  const [name, setName] = useState('')
+  const [codeInput, setCodeInput] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [cards, setCards] = useState<StudyCard[]>([])
+  const [subject, setSubject] = useState('')
+
+  // 学習中の状態
+  const [queue, setQueue] = useState<StudyCard[] | null>(null)
+  const [sessionTotal, setSessionTotal] = useState(0)
+  const [flipped, setFlipped] = useState(false)
+  const [reversed, setReversed] = useState(false)
+  const [results, setResults] = useState<Result[]>([])
+  const [saving, setSaving] = useState(false)
+  const [summary, setSummary] = useState<{ correct: number; total: number } | null>(null)
+
+  const loadCards = useCallback(async (studentCode: string) => {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/flashcards/cards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: studentCode }),
+      })
+      if (res.ok) {
+        setCards(await res.json())
+      } else {
+        setError('カードを読み込めませんでした')
+      }
+    } catch {
+      setError('カードを読み込めませんでした')
+    }
+    setLoading(false)
+  }, [])
+
+  const login = useCallback(async (studentCode: string) => {
+    setError('')
+    setLoading(true)
+    try {
+      const res = await fetch('/api/flashcards/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: studentCode }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || 'ログインに失敗しました')
+        try { localStorage.removeItem(CODE_KEY) } catch {}
+        setLoading(false)
+        return
+      }
+      try { localStorage.setItem(CODE_KEY, data.code) } catch {}
+      setCode(data.code)
+      setName(data.name)
+      await loadCards(data.code)
+    } catch {
+      setError('ログインに失敗しました')
+      setLoading(false)
+    }
+  }, [loadCards])
+
+  useEffect(() => {
+    let saved: string | null = null
+    try { saved = localStorage.getItem(CODE_KEY) } catch {}
+    if (saved) {
+      login(saved)
+    } else {
+      setLoading(false)
+    }
+  }, [login])
+
+  const logout = () => {
+    try { localStorage.removeItem(CODE_KEY) } catch {}
+    setCode('')
+    setName('')
+    setCards([])
+  }
+
+  const subjects = useMemo(() => [...new Set(cards.map(c => c.subject))], [cards])
+  const currentSubject = subjects.includes(subject) ? subject : subjects[0] || ''
+
+  const units = useMemo(() => {
+    const today = todayJST()
+    const map = new Map<string, StudyCard[]>()
+    cards.filter(c => c.subject === currentSubject).forEach(c => {
+      map.set(c.unit, [...(map.get(c.unit) || []), c])
+    })
+    return [...map.entries()].map(([unit, unitCards]) => ({
+      unit,
+      cards: unitCards,
+      due: unitCards.filter(c => isDue(c, today)).length,
+      fresh: unitCards.filter(c => c.box === 0).length,
+      learned: unitCards.filter(c => c.box >= LEARNED_BOX).length,
+    }))
+  }, [cards, currentSubject])
+
+  const start = (sessionCards: StudyCard[]) => {
+    if (sessionCards.length === 0) return
+    setQueue(sessionCards)
+    setSessionTotal(sessionCards.length)
+    setResults([])
+    setFlipped(false)
+    setSummary(null)
+  }
+
+  const startReview = (unitCards: StudyCard[]) => {
+    const today = todayJST()
+    const due = shuffle(unitCards.filter(c => isDue(c, today)))
+    const fresh = unitCards.filter(c => c.box === 0).slice(0, NEW_CARDS_PER_SESSION)
+    start([...due, ...fresh])
+  }
+
+  const finish = async (finalResults: Result[]) => {
+    setQueue(null)
+    if (finalResults.length === 0) return
+    const firstAnswers = new Map<string, boolean>()
+    finalResults.forEach(r => { if (!firstAnswers.has(r.cardId)) firstAnswers.set(r.cardId, r.correct) })
+    setSummary({ correct: [...firstAnswers.values()].filter(Boolean).length, total: firstAnswers.size })
+    // 復習日前のカードに「全枚数を通す」で正解しても間隔は伸ばさない（間違えた場合のみ記録）
+    const today = todayJST()
+    const byId = new Map(cards.map(c => [c.id, c]))
+    const toSave = finalResults.filter(r => {
+      const c = byId.get(r.cardId)
+      return !r.correct || !c || c.box === 0 || isDue(c, today)
+    })
+    if (toSave.length === 0) return
+    setSaving(true)
+    try {
+      const res = await fetch('/api/flashcards/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, results: toSave }),
+      })
+      if (!res.ok) setError('学習記録の保存に失敗しました')
+    } catch {
+      setError('学習記録の保存に失敗しました')
+    }
+    setSaving(false)
+    loadCards(code)
+  }
+
+  const answer = (correct: boolean) => {
+    if (!queue) return
+    const [current, ...rest] = queue
+    const nextResults = [...results, { cardId: current.id, correct }]
+    // 間違えたカードはセッションの最後にもう一度出す（記録は1回目の回答のみ）
+    const nextQueue = correct ? rest : [...rest, current]
+    setResults(nextResults)
+    setFlipped(false)
+    if (nextQueue.length === 0) {
+      finish(nextResults)
+    } else {
+      setQueue(nextQueue)
+    }
+  }
+
+  // ---------- ログイン画面 ----------
+  if (!code) {
+    return (
+      <main className="min-h-screen bg-white">
+        <Header title="単語カード" subtitle="学校プリントの重要語句" showBackLink />
+        <div className="container mx-auto px-4 py-12">
+          <div className="max-w-md mx-auto bg-white border border-gray-200 rounded-lg shadow-sm p-8">
+            <div className="flex justify-center mb-6">
+              <div className="bg-[#2b6ca3]/10 p-4 rounded-full">
+                <Layers className="w-8 h-8 text-[#2b6ca3]" />
+              </div>
+            </div>
+            <p className="text-sm text-gray-600 text-center mb-6">
+              先生から受け取った生徒コードを入力してください
+            </p>
+            <form onSubmit={e => { e.preventDefault(); login(codeInput) }}>
+              {error && (
+                <div className="flex items-center gap-2 bg-red-50 text-red-600 px-4 py-3 rounded-lg mb-4">
+                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                  <span className="text-sm">{error}</span>
+                </div>
+              )}
+              <input
+                value={codeInput}
+                onChange={e => setCodeInput(e.target.value.toUpperCase())}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-center text-2xl tracking-[0.3em] font-mono focus:ring-2 focus:ring-[#2b6ca3] focus:border-transparent outline-none mb-6"
+                placeholder="ABC234"
+                maxLength={6}
+                autoCapitalize="characters"
+                autoComplete="off"
+                required
+              />
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-[#2b6ca3] text-white py-3 rounded-lg font-medium hover:bg-[#245a8a] transition disabled:opacity-50"
+              >
+                {loading ? '確認中...' : 'はじめる'}
+              </button>
+            </form>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  // ---------- 学習画面 ----------
+  if (queue) {
+    const current = queue[0]
+    const question = reversed ? current.back : current.front
+    const answerText = reversed ? current.front : current.back
+    const answered = new Set(results.map(r => r.cardId)).size
+    return (
+      <main className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-6 max-w-xl">
+          <div className="flex items-center justify-between mb-4 text-sm text-gray-600">
+            <button onClick={() => finish(results)} className="hover:text-[#2b6ca3]">
+              ← 中断して保存
+            </button>
+            <span>{current.unit}</span>
+            <span>{Math.min(answered + 1, sessionTotal)} / {sessionTotal}</span>
+          </div>
+          <div className="h-1.5 bg-gray-200 rounded-full mb-6 overflow-hidden">
+            <div className="h-full bg-[#3ab5cd] transition-all" style={{ width: `${(answered / sessionTotal) * 100}%` }} />
+          </div>
+
+          <button
+            onClick={() => setFlipped(f => !f)}
+            className="w-full min-h-[320px] bg-white rounded-2xl shadow-md border border-gray-200 p-8 flex flex-col items-center justify-center text-center"
+          >
+            <div className="text-2xl md:text-3xl font-bold text-gray-800 break-words">{question}</div>
+            {flipped ? (
+              <div className="mt-6 pt-6 border-t border-gray-200 w-full text-lg text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
+                {answerText}
+              </div>
+            ) : (
+              <div className="mt-8 text-sm text-gray-400">タップして答えを見る</div>
+            )}
+          </button>
+
+          {flipped && (
+            <div className="grid grid-cols-2 gap-4 mt-6">
+              <button
+                onClick={() => answer(false)}
+                className="flex items-center justify-center gap-2 bg-white border-2 border-[#e63278] text-[#e63278] py-4 rounded-xl font-bold hover:bg-[#e63278]/5"
+              >
+                <X className="w-5 h-5" /> まだ
+              </button>
+              <button
+                onClick={() => answer(true)}
+                className="flex items-center justify-center gap-2 bg-[#2b6ca3] text-white py-4 rounded-xl font-bold hover:bg-[#245a8a]"
+              >
+                <Check className="w-5 h-5" /> 覚えた
+              </button>
+            </div>
+          )}
+        </div>
+      </main>
+    )
+  }
+
+  // ---------- 単元一覧 ----------
+  return (
+    <main className="min-h-screen bg-white">
+      <Header title="単語カード" subtitle="学校プリントの重要語句" showBackLink />
+      <div className="container mx-auto px-4 py-8 max-w-3xl">
+        <div className="flex items-center justify-between mb-6">
+          <p className="text-gray-700"><span className="font-bold">{name}</span> さん</p>
+          <div className="flex items-center gap-4 text-sm">
+            <button
+              onClick={() => setReversed(r => !r)}
+              className="flex items-center gap-1 text-gray-600 hover:text-[#2b6ca3]"
+            >
+              <ArrowLeftRight className="w-4 h-4" />
+              {reversed ? '説明 → 用語' : '用語 → 説明'}
+            </button>
+            <button onClick={logout} className="flex items-center gap-1 text-gray-500 hover:text-gray-800">
+              <LogOut className="w-4 h-4" /> ログアウト
+            </button>
+          </div>
+        </div>
+
+        {summary && (
+          <div className="bg-[#3ab5cd]/10 border border-[#3ab5cd]/30 rounded-lg p-4 mb-6 text-center">
+            <p className="font-bold text-[#2b6ca3]">
+              おつかれさま！ {summary.total}枚中 {summary.correct}枚を1回目で正解
+            </p>
+            <p className="text-sm text-gray-600 mt-1">
+              {saving ? '記録を保存中...' : '間違えたカードは明日また出題されます'}
+            </p>
+          </div>
+        )}
+        {error && (
+          <div className="flex items-center gap-2 bg-red-50 text-red-600 px-4 py-3 rounded-lg mb-6">
+            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <span className="text-sm">{error}</span>
+          </div>
+        )}
+
+        {subjects.length > 1 && (
+          <div className="flex flex-wrap gap-2 mb-6">
+            {subjects.map(s => (
+              <button
+                key={s}
+                onClick={() => setSubject(s)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+                  s === currentSubject ? 'bg-[#2b6ca3] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {loading && cards.length === 0 ? (
+          <p className="text-center text-gray-500 py-12">読み込み中...</p>
+        ) : units.length === 0 ? (
+          <p className="text-center text-gray-500 py-12">まだカードが登録されていません</p>
+        ) : (
+          <div className="space-y-4">
+            {units.map(u => {
+              const todayCount = u.due + Math.min(u.fresh, NEW_CARDS_PER_SESSION)
+              return (
+                <div key={u.unit} className="border border-gray-200 rounded-lg p-5">
+                  <div className="flex items-start justify-between gap-4 mb-3">
+                    <h3 className="text-lg font-bold text-gray-800">{u.unit}</h3>
+                    <span className="text-sm text-gray-500 whitespace-nowrap">
+                      定着 {u.learned} / {u.cards.length}
+                    </span>
+                  </div>
+                  <div className="h-2 bg-gray-100 rounded-full mb-4 overflow-hidden">
+                    <div className="h-full bg-[#3ab5cd]" style={{ width: `${(u.learned / u.cards.length) * 100}%` }} />
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      onClick={() => startReview(u.cards)}
+                      disabled={todayCount === 0}
+                      className="bg-[#2b6ca3] text-white px-5 py-2 rounded-lg font-medium hover:bg-[#245a8a] disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    >
+                      {todayCount > 0 ? `今日の学習 ${todayCount}枚` : '今日の分は完了'}
+                    </button>
+                    <button
+                      onClick={() => start(shuffle(u.cards))}
+                      className="flex items-center gap-1 text-[#2b6ca3] px-3 py-2 rounded-lg hover:bg-[#2b6ca3]/5"
+                    >
+                      <RotateCcw className="w-4 h-4" /> 全{u.cards.length}枚を通す
+                    </button>
+                    <span className="text-xs text-gray-500">
+                      復習 {u.due}・未学習 {u.fresh}
+                    </span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    </main>
+  )
+}
