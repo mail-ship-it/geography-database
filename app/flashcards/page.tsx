@@ -180,7 +180,11 @@ export default function FlashcardsPage() {
             <p className="text-sm text-gray-600 text-center mb-6">
               先生から受け取った生徒コードを入力してください
             </p>
-            <form onSubmit={e => { e.preventDefault(); login(codeInput) }}>
+            <form onSubmit={e => {
+              e.preventDefault()
+              // 全角英数字（日本語キーボード）も受け付ける
+              login(codeInput.normalize('NFKC').replace(/\s/g, '').toUpperCase())
+            }}>
               {error && (
                 <div className="flex items-center gap-2 bg-red-50 text-red-600 px-4 py-3 rounded-lg mb-4">
                   <AlertCircle className="w-5 h-5 flex-shrink-0" />
@@ -189,12 +193,15 @@ export default function FlashcardsPage() {
               )}
               <input
                 value={codeInput}
-                onChange={e => setCodeInput(e.target.value.toUpperCase())}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-center text-2xl tracking-[0.3em] font-mono focus:ring-2 focus:ring-[#2b6ca3] focus:border-transparent outline-none mb-6"
+                // 入力中に値を書き換えるとiPadで文字が重複入力されるため、大文字化は表示(CSS)と送信時のみ
+                onChange={e => setCodeInput(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-center text-2xl tracking-[0.3em] font-mono uppercase focus:ring-2 focus:ring-[#2b6ca3] focus:border-transparent outline-none mb-6"
                 placeholder="ABC234"
                 maxLength={6}
                 autoCapitalize="characters"
                 autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
                 required
               />
               <button
