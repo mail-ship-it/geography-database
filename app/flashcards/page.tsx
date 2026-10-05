@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { Layers, RotateCcw, Check, X, LogOut, ArrowLeftRight, AlertCircle } from 'lucide-react'
+import { Layers, RotateCcw, Check, X, LogOut, ArrowLeftRight, AlertCircle, Shuffle } from 'lucide-react'
 import Header from '../components/Header'
 
 type StudyCard = {
@@ -327,6 +327,44 @@ export default function FlashcardsPage() {
           <p className="text-center text-gray-500 py-12">まだカードが登録されていません</p>
         ) : (
           <div className="space-y-4">
+            {units.length > 1 && (() => {
+              // 科目内の全単元を混ぜて出題
+              const subjectCards = units.flatMap(u => u.cards)
+              const known = subjectCards.filter(c => c.known).length
+              const unknownCards = subjectCards.filter(c => !c.known)
+              return (
+                <div className="border-2 border-[#3ab5cd] bg-[#3ab5cd]/5 rounded-lg p-5">
+                  <div className="flex items-start justify-between gap-4 mb-3">
+                    <h3 className="text-lg font-bold text-gray-800">
+                      <Shuffle className="w-5 h-5 inline -mt-1 mr-1 text-[#3ab5cd]" />
+                      {currentSubject} 全単元ミックス
+                    </h3>
+                    <span className="text-sm text-gray-500 whitespace-nowrap">
+                      覚えた {known} / {subjectCards.length}
+                    </span>
+                  </div>
+                  <div className="h-2 bg-white rounded-full mb-4 overflow-hidden">
+                    <div className="h-full bg-[#3ab5cd]" style={{ width: `${(known / subjectCards.length) * 100}%` }} />
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      onClick={() => start(shuffle(unknownCards))}
+                      disabled={unknownCards.length === 0}
+                      className="bg-[#2b6ca3] text-white px-5 py-2 rounded-lg font-medium hover:bg-[#245a8a] disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    >
+                      {unknownCards.length > 0 ? `まだのカードだけ ${unknownCards.length}枚` : '全部覚えた！'}
+                    </button>
+                    <button
+                      onClick={() => start(shuffle(subjectCards))}
+                      className="flex items-center gap-1 text-[#2b6ca3] px-3 py-2 rounded-lg hover:bg-[#2b6ca3]/5"
+                    >
+                      <RotateCcw className="w-4 h-4" /> 全部 {subjectCards.length}枚
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-3">途中でやめても「中断して保存」でそこまでの結果が記録されます</p>
+                </div>
+              )
+            })()}
             {units.map(u => {
               const unknownCards = u.cards.filter(c => !c.known)
               return (
