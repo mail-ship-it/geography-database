@@ -10,17 +10,12 @@ type StudyCard = {
   unit: string
   front: string
   back: string
-  box: number
-  due: string
+  known: boolean
 }
 
 type Result = { cardId: string; correct: boolean }
 
 const CODE_KEY = 'flashcard_code'
-const NEW_CARDS_PER_SESSION = 20
-const LEARNED_BOX = 3 // ボックス3以上（1週間後の復習に進んだ）を「定着」とみなす
-
-const todayJST = () => new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10)
 
 const shuffle = <T,>(items: T[]) => {
   const a = [...items]
@@ -30,8 +25,6 @@ const shuffle = <T,>(items: T[]) => {
   }
   return a
 }
-
-const isDue = (c: StudyCard, today: string) => c.box > 0 && c.due <= today
 
 export default function FlashcardsPage() {
   const [code, setCode] = useState('')
@@ -117,7 +110,6 @@ export default function FlashcardsPage() {
   const currentSubject = subjects.includes(subject) ? subject : subjects[0] || ''
 
   const units = useMemo(() => {
-    const today = todayJST()
     const map = new Map<string, StudyCard[]>()
     cards.filter(c => c.subject === currentSubject).forEach(c => {
       map.set(c.unit, [...(map.get(c.unit) || []), c])
@@ -125,9 +117,7 @@ export default function FlashcardsPage() {
     return [...map.entries()].map(([unit, unitCards]) => ({
       unit,
       cards: unitCards,
-      due: unitCards.filter(c => isDue(c, today)).length,
-      fresh: unitCards.filter(c => c.box === 0).length,
-      learned: unitCards.filter(c => c.box >= LEARNED_BOX).length,
+      known: unitCards.filter(c => c.known).length,
     }))
   }, [cards, currentSubject])
 
@@ -140,33 +130,18 @@ export default function FlashcardsPage() {
     setSummary(null)
   }
 
-  const startReview = (unitCards: StudyCard[]) => {
-    const today = todayJST()
-    const due = shuffle(unitCards.filter(c => isDue(c, today)))
-    const fresh = unitCards.filter(c => c.box === 0).slice(0, NEW_CARDS_PER_SESSION)
-    start([...due, ...fresh])
-  }
-
   const finish = async (finalResults: Result[]) => {
     setQueue(null)
     if (finalResults.length === 0) return
     const firstAnswers = new Map<string, boolean>()
     finalResults.forEach(r => { if (!firstAnswers.has(r.cardId)) firstAnswers.set(r.cardId, r.correct) })
     setSummary({ correct: [...firstAnswers.values()].filter(Boolean).length, total: firstAnswers.size })
-    // 復習日前のカードに「全枚数を通す」で正解しても間隔は伸ばさない（間違えた場合のみ記録）
-    const today = todayJST()
-    const byId = new Map(cards.map(c => [c.id, c]))
-    const toSave = finalResults.filter(r => {
-      const c = byId.get(r.cardId)
-      return !r.correct || !c || c.box === 0 || isDue(c, today)
-    })
-    if (toSave.length === 0) return
     setSaving(true)
     try {
       const res = await fetch('/api/flashcards/progress', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, results: toSave }),
+        body: JSON.stringify({ code, results: finalResults }),
       })
       if (!res.ok) setError('学習記録の保存に失敗しました')
     } catch {
@@ -319,7 +294,7 @@ export default function FlashcardsPage() {
               おつかれさま！ {summary.total}枚中 {summary.correct}枚を1回目で正解
             </p>
             <p className="text-sm text-gray-600 mt-1">
-              {saving ? '記録を保存中...' : '間違えたカードは明日また出題されます'}
+              {saving ? '記録を保存中...' : '「まだ」のカードは「まだのカードだけ」で繰り返し練習できます'}
             </p>
           </div>
         )}
@@ -353,35 +328,32 @@ export default function FlashcardsPage() {
         ) : (
           <div className="space-y-4">
             {units.map(u => {
-              const todayCount = u.due + Math.min(u.fresh, NEW_CARDS_PER_SESSION)
+              const unknownCards = u.cards.filter(c => !c.known)
               return (
                 <div key={u.unit} className="border border-gray-200 rounded-lg p-5">
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <h3 className="text-lg font-bold text-gray-800">{u.unit}</h3>
                     <span className="text-sm text-gray-500 whitespace-nowrap">
-                      定着 {u.learned} / {u.cards.length}
+                      覚えた {u.known} / {u.cards.length}
                     </span>
                   </div>
                   <div className="h-2 bg-gray-100 rounded-full mb-4 overflow-hidden">
-                    <div className="h-full bg-[#3ab5cd]" style={{ width: `${(u.learned / u.cards.length) * 100}%` }} />
+                    <div className="h-full bg-[#3ab5cd]" style={{ width: `${(u.known / u.cards.length) * 100}%` }} />
                   </div>
                   <div className="flex flex-wrap items-center gap-3">
                     <button
-                      onClick={() => startReview(u.cards)}
-                      disabled={todayCount === 0}
+                      onClick={() => start(shuffle(unknownCards))}
+                      disabled={unknownCards.length === 0}
                       className="bg-[#2b6ca3] text-white px-5 py-2 rounded-lg font-medium hover:bg-[#245a8a] disabled:bg-gray-300 disabled:cursor-not-allowed"
                     >
-                      {todayCount > 0 ? `今日の学習 ${todayCount}枚` : '今日の分は完了'}
+                      {unknownCards.length > 0 ? `まだのカードだけ ${unknownCards.length}枚` : '全部覚えた！'}
                     </button>
                     <button
                       onClick={() => start(shuffle(u.cards))}
                       className="flex items-center gap-1 text-[#2b6ca3] px-3 py-2 rounded-lg hover:bg-[#2b6ca3]/5"
                     >
-                      <RotateCcw className="w-4 h-4" /> 全{u.cards.length}枚を通す
+                      <RotateCcw className="w-4 h-4" /> 全部 {u.cards.length}枚
                     </button>
-                    <span className="text-xs text-gray-500">
-                      復習 {u.due}・未学習 {u.fresh}
-                    </span>
                   </div>
                 </div>
               )

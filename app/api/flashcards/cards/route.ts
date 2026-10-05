@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
-import { findStudent, getPublishedCards, getStudentProgress } from '@/lib/flashcards'
+import { findStudent, getPublishedCards, getStudentProgress, KNOWN } from '@/lib/flashcards'
 
-// 公開カード一覧と、その生徒の進捗（ボックス・次回日）をまとめて返す
+// 公開カード一覧と、その生徒の各カードの状態（覚えた / まだ / 未学習）をまとめて返す
 export async function POST(request: Request) {
   try {
     const { code } = await request.json()
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       cards.map(card => {
         const p = progress.get(card.id)
-        return { ...card, box: p?.box ?? 0, due: p?.due ?? '' }
+        return { ...card, known: p?.status === KNOWN }
       })
     )
   } catch (error) {

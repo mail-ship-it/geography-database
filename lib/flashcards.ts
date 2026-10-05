@@ -3,9 +3,8 @@ import { google } from 'googleapis'
 // 単語カードDB（chirijyuku-tools/scripts/flashcards/flashcards.py で作成・カード登録）
 export const FLASHCARD_SPREADSHEET_ID = '1ZFovBXd6ylHZi1qUmsbfOM6F4gulyRe6tn2k6Ui9bew'
 
-// ボックスごとの復習間隔（日）。正解でボックスが1つ上がり、不正解でボックス1に戻る
-const INTERVAL_DAYS = [0, 1, 3, 7, 14, 30]
-export const MAX_BOX = INTERVAL_DAYS.length - 1
+export const KNOWN = '覚えた'
+export const UNKNOWN = 'まだ'
 
 export type Card = {
   id: string
@@ -16,8 +15,7 @@ export type Card = {
 }
 
 export type Progress = {
-  box: number
-  due: string // YYYY-MM-DD
+  status: string // 覚えた / まだ（直近の回答）
   correct: number
   wrong: number
 }
@@ -32,20 +30,7 @@ export const getFlashcardSheetsClient = () => {
 }
 
 // 日本時間の今日（YYYY-MM-DD）
-export const todayJST = (offsetDays = 0) => {
-  const d = new Date(Date.now() + 9 * 3600 * 1000 + offsetDays * 86400 * 1000)
-  return d.toISOString().slice(0, 10)
-}
-
-export const nextProgress = (prev: Progress | undefined, correct: boolean): Progress => {
-  const box = correct ? Math.min((prev?.box ?? 0) + 1, MAX_BOX) : 1
-  return {
-    box,
-    due: todayJST(correct ? INTERVAL_DAYS[box] : 1),
-    correct: (prev?.correct ?? 0) + (correct ? 1 : 0),
-    wrong: (prev?.wrong ?? 0) + (correct ? 0 : 1),
-  }
-}
+const todayJST = () => new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10)
 
 export async function getPublishedCards(): Promise<Card[]> {
   const sheets = getFlashcardSheetsClient()
@@ -79,18 +64,17 @@ export async function getStudentProgress(code: string) {
   const sheets = getFlashcardSheetsClient()
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: FLASHCARD_SPREADSHEET_ID,
-    range: '進捗!A2:G',
+    range: '進捗!A2:F',
   })
-  // 列構成: 生徒コード, カードID, ボックス, 次回日, 正解数, 不正解数, 最終学習日
+  // 列構成: 生徒コード, カードID, 状態, 覚えた回数, まだ回数, 最終学習日
   const progress = new Map<string, Progress & { rowNumber: number }>()
   ;(res.data.values || []).forEach((row, i) => {
     if (row[0] !== code) return
     progress.set(row[1], {
       rowNumber: i + 2,
-      box: Number(row[2]) || 0,
-      due: row[3] || '',
-      correct: Number(row[4]) || 0,
-      wrong: Number(row[5]) || 0,
+      status: row[2] || '',
+      correct: Number(row[3]) || 0,
+      wrong: Number(row[4]) || 0,
     })
   })
   return progress
@@ -112,10 +96,16 @@ export async function saveResults(code: string, results: { cardId: string; corre
 
   for (const [cardId, correct] of firstAnswers) {
     const prev = progress.get(cardId)
-    const next = nextProgress(prev, correct)
-    const row = [code, cardId, next.box, next.due, next.correct, next.wrong, today]
+    const row = [
+      code,
+      cardId,
+      correct ? KNOWN : UNKNOWN,
+      (prev?.correct ?? 0) + (correct ? 1 : 0),
+      (prev?.wrong ?? 0) + (correct ? 0 : 1),
+      today,
+    ]
     if (prev) {
-      updates.push({ range: `進捗!A${prev.rowNumber}:G${prev.rowNumber}`, values: [row] })
+      updates.push({ range: `進捗!A${prev.rowNumber}:F${prev.rowNumber}`, values: [row] })
     } else {
       appends.push(row)
     }
@@ -130,7 +120,7 @@ export async function saveResults(code: string, results: { cardId: string; corre
   if (appends.length) {
     await sheets.spreadsheets.values.append({
       spreadsheetId: FLASHCARD_SPREADSHEET_ID,
-      range: '進捗!A:G',
+      range: '進捗!A:F',
       valueInputOption: 'RAW',
       insertDataOption: 'INSERT_ROWS',
       requestBody: { values: appends },
