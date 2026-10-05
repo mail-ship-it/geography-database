@@ -4,7 +4,7 @@ import { google } from 'googleapis'
 export const FLASHCARD_SPREADSHEET_ID = '1ZFovBXd6ylHZi1qUmsbfOM6F4gulyRe6tn2k6Ui9bew'
 
 export const KNOWN = '覚えた'
-export const UNKNOWN = 'まだ'
+export const UNKNOWN = '未習得'
 
 export type Card = {
   id: string
@@ -15,7 +15,7 @@ export type Card = {
 }
 
 export type Progress = {
-  status: string // 覚えた / まだ（直近の回答）
+  status: string // 覚えた / 未習得（直近の回答）
   correct: number
   wrong: number
 }
@@ -66,7 +66,7 @@ export async function getStudentProgress(code: string) {
     spreadsheetId: FLASHCARD_SPREADSHEET_ID,
     range: '進捗!A2:F',
   })
-  // 列構成: 生徒コード, カードID, 状態, 覚えた回数, まだ回数, 最終学習日
+  // 列構成: 生徒コード, カードID, 状態, 覚えた回数, 覚えていない回数, 最終学習日
   const progress = new Map<string, Progress & { rowNumber: number }>()
   ;(res.data.values || []).forEach((row, i) => {
     if (row[0] !== code) return

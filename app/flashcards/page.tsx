@@ -42,7 +42,7 @@ export default function FlashcardsPage() {
   const [reversed, setReversed] = useState(true) // 既定は「説明 → 用語」
   const [results, setResults] = useState<Result[]>([])
   const [saving, setSaving] = useState(false)
-  const [summary, setSummary] = useState<{ correct: number; total: number } | null>(null)
+  const [summary, setSummary] = useState<{ correct: number; total: number; missed: StudyCard[] } | null>(null)
 
   const loadCards = useCallback(async (studentCode: string) => {
     setLoading(true)
@@ -133,9 +133,9 @@ export default function FlashcardsPage() {
   const finish = async (finalResults: Result[]) => {
     setQueue(null)
     if (finalResults.length === 0) return
-    const firstAnswers = new Map<string, boolean>()
-    finalResults.forEach(r => { if (!firstAnswers.has(r.cardId)) firstAnswers.set(r.cardId, r.correct) })
-    setSummary({ correct: [...firstAnswers.values()].filter(Boolean).length, total: firstAnswers.size })
+    const byId = new Map(cards.map(c => [c.id, c]))
+    const missed = finalResults.filter(r => !r.correct).map(r => byId.get(r.cardId)).filter((c): c is StudyCard => !!c)
+    setSummary({ correct: finalResults.length - missed.length, total: finalResults.length, missed })
     setSaving(true)
     try {
       const res = await fetch('/api/flashcards/progress', {
@@ -155,14 +155,13 @@ export default function FlashcardsPage() {
     if (!queue) return
     const [current, ...rest] = queue
     const nextResults = [...results, { cardId: current.id, correct }]
-    // 間違えたカードはセッションの最後にもう一度出す（記録は1回目の回答のみ）
-    const nextQueue = correct ? rest : [...rest, current]
     setResults(nextResults)
     setFlipped(false)
-    if (nextQueue.length === 0) {
+    // 全カードを1回ずつ見たら終了（覚えていないカードは結果画面から再挑戦できる）
+    if (rest.length === 0) {
       finish(nextResults)
     } else {
-      setQueue(nextQueue)
+      setQueue(rest)
     }
   }
 
@@ -217,7 +216,7 @@ export default function FlashcardsPage() {
     const current = queue[0]
     const question = reversed ? current.back : current.front
     const answerText = reversed ? current.front : current.back
-    const answered = new Set(results.map(r => r.cardId)).size
+    const answered = results.length
     return (
       <main className="min-h-screen bg-gray-50">
         <div className="container mx-auto px-4 py-6 max-w-xl">
@@ -252,7 +251,7 @@ export default function FlashcardsPage() {
                 onClick={() => answer(false)}
                 className="flex items-center justify-center gap-2 bg-white border-2 border-[#e63278] text-[#e63278] py-4 rounded-xl font-bold hover:bg-[#e63278]/5"
               >
-                <X className="w-5 h-5" /> まだ
+                <X className="w-5 h-5" /> 覚えていない
               </button>
               <button
                 onClick={() => answer(true)}
@@ -291,11 +290,17 @@ export default function FlashcardsPage() {
         {summary && (
           <div className="bg-[#3ab5cd]/10 border border-[#3ab5cd]/30 rounded-lg p-4 mb-6 text-center">
             <p className="font-bold text-[#2b6ca3]">
-              おつかれさま！ {summary.total}枚中 {summary.correct}枚を1回目で正解
+              おつかれさま！ {summary.total}枚中 {summary.correct}枚を覚えた
             </p>
-            <p className="text-sm text-gray-600 mt-1">
-              {saving ? '記録を保存中...' : '「まだ」のカードは「まだのカードだけ」で繰り返し練習できます'}
-            </p>
+            {saving && <p className="text-sm text-gray-600 mt-1">記録を保存中...</p>}
+            {summary.missed.length > 0 && (
+              <button
+                onClick={() => start(shuffle(summary.missed))}
+                className="mt-3 bg-[#2b6ca3] text-white px-5 py-2 rounded-lg font-medium hover:bg-[#245a8a]"
+              >
+                覚えていないカードをもう一度（{summary.missed.length}枚）
+              </button>
+            )}
           </div>
         )}
         {error && (
@@ -352,7 +357,7 @@ export default function FlashcardsPage() {
                       disabled={unknownCards.length === 0}
                       className="bg-[#2b6ca3] text-white px-5 py-2 rounded-lg font-medium hover:bg-[#245a8a] disabled:bg-gray-300 disabled:cursor-not-allowed"
                     >
-                      {unknownCards.length > 0 ? `まだのカードだけ ${unknownCards.length}枚` : '全部覚えた！'}
+                      {unknownCards.length > 0 ? `未習得のカードだけ ${unknownCards.length}枚` : '全部覚えた！'}
                     </button>
                     <button
                       onClick={() => start(shuffle(subjectCards))}
@@ -384,7 +389,7 @@ export default function FlashcardsPage() {
                       disabled={unknownCards.length === 0}
                       className="bg-[#2b6ca3] text-white px-5 py-2 rounded-lg font-medium hover:bg-[#245a8a] disabled:bg-gray-300 disabled:cursor-not-allowed"
                     >
-                      {unknownCards.length > 0 ? `まだのカードだけ ${unknownCards.length}枚` : '全部覚えた！'}
+                      {unknownCards.length > 0 ? `未習得のカードだけ ${unknownCards.length}枚` : '全部覚えた！'}
                     </button>
                     <button
                       onClick={() => start(shuffle(u.cards))}
