@@ -46,7 +46,7 @@ export default function FlashcardsPage() {
   const [queue, setQueue] = useState<StudyCard[] | null>(null)
   const [sessionTotal, setSessionTotal] = useState(0)
   const [flipped, setFlipped] = useState(false)
-  const [reversed, setReversed] = useState(false)
+  const [reversed, setReversed] = useState(true) // 既定は「説明 → 用語」
   const [results, setResults] = useState<Result[]>([])
   const [saving, setSaving] = useState(false)
   const [summary, setSummary] = useState<{ correct: number; total: number } | null>(null)
